@@ -68,20 +68,20 @@
     var eye = v3.create(10, 0, 0);
     var up = v3.create(0, 1, 0);
 
-    var position = v3.create(0,0,0);
+    var position = v3.create(0,3,0);
 
     var invview = m4.lookAt(eye, target, up);
     var view = m4.inverse(invview);
-    var world = m4.setTranslation(m4.create(), position);
-    var projection = m4.ortho(-aspect*frustum, aspect*frustum, frustum, -frustum, 1, 100);
+    var world = m4.translate(m4.create(), position);
+    var projection = m4.ortho(-aspect*frustum, aspect*frustum, -frustum, frustum, 1, 100);
     var invproj = m4.inverse(projection);
 
     var screenNear = screenToWorld(mouseX, mouseY, invproj, invview, 0);
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
-    console.log(direction);
 
     var collide = collideLine(position, 1.0, screenNear, direction);
+
     var alpha = collide ? 1.0 : 0.5;
 
     var uniforms = {
