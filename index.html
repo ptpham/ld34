@@ -30,6 +30,7 @@
   <progress id="waterBar" value="100"></progress>
   <canvas id="canvas"></canvas>
 </body>
+<script src="./terrain-generator2.js"></script>
 <script>
   var gl = twgl.getWebGLContext(canvas);
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
@@ -39,13 +40,15 @@
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   var uniforms = {
-    resolution: [gl.canvas.width, gl.canvas.height],
+    resolution: [gl.canvas.width, gl.canvas.height]
   };
 
+  var bridgeBufferInfo = createTerrainBufferInfo(gl, layers, size);
+
   gl.useProgram(defaultProgramInfo.program);
-  twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
+  twgl.setBuffersAndAttributes(gl, defaultProgramInfo, bridgeBufferInfo);
   twgl.setUniforms(defaultProgramInfo, uniforms);
-  twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+  twgl.drawBufferInfo(gl, gl.TRIANGLES, bridgeBufferInfo);
 </script>
 </html>
 
