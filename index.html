@@ -5,47 +5,96 @@
 <head>
   <script src="underscore-min.js"></script>
   <script src="twgl-full.min.js"></script>
+  <script src="collisions.js"></script>
 </head>
 <body>
 
 <script id="default-vs" type="x-shader/v-shader">
   attribute vec3 position;
+  uniform mat4 u_projection;
+  uniform mat4 u_world;
+  uniform mat4 u_view;
 
   void main() {
-    gl_Position = vec4(position, 1.0);
+    gl_Position = u_projection*u_view*u_world*vec4(position, 1.0);
   }
 </script>
 
 <script id="default-fs" type="x-shader/f-shader">
   precision mediump float;
+  uniform float u_alpha;
 
   void main() {
-    gl_FragColor = vec4(0.0, 1.0, 0.5, 1.0);
+    gl_FragColor = vec4(0.0, 1.0, 0.5, u_alpha);
   }
 </script>
 
 <style>
   canvas { width: 100%; height: 100%; }
+  #watermeter { position: absolute; top: 0px; }
 </style>
-  <progress id="waterBar" value="100"></progress>
+  <progress id="watermeter" value="100"></progress>
   <canvas id="canvas"></canvas>
 </body>
 <script>
+
+  var v3 = twgl.v3, m4 = twgl.m4;
   var gl = twgl.getWebGLContext(canvas);
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
-
-  twgl.resizeCanvasToDisplaySize(gl.canvas);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  var uniforms = {
-    resolution: [gl.canvas.width, gl.canvas.height],
+  
+  var mouseX = 0, mouseY = 0;
+  canvas.onmousemove = function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
   };
 
-  gl.useProgram(defaultProgramInfo.program);
-  twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
-  twgl.setUniforms(defaultProgramInfo, uniforms);
-  twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+  function screenToWorld(x, y, invproj, invview) {
+    var width = canvas.width, height = canvas.height;
+    var dx = 2*mouseX/width - 1;
+    var dy = 1 - 2*mouseY/height;
+    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, 0]));
+  }
+
+  function render() {
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    var width = gl.canvas.width, height = gl.canvas.height;
+    var aspect = width/height, frustum = 10;
+    gl.viewport(0, 0, width, height);
+   
+    var target = v3.create(0, 0, 0);
+    var eye = v3.create(10, 0, 0);
+    var up = v3.create(0, 1, 0);
+
+    var position = v3.create(0,0,0);
+
+    var invview = m4.lookAt(eye, target, up);
+    var view = m4.inverse(invview);
+    var world = m4.setTranslation(m4.create(), position);
+    var projection = m4.perspective(Math.PI/2, aspect, 1, 100);
+    var invproj = m4.inverse(projection);
+
+    var screen = screenToWorld(mouseX, mouseY, invproj, invview);
+    var direction = v3.normalize(v3.subtract(eye, screen));
+    console.log(screen);
+    console.log(direction);
+
+    var collide = collideLine(position, 1.0, screen, direction);
+    var alpha = collide ? 1.0 : 0.5;
+
+    var uniforms = {
+      u_projection: projection, u_world: world, u_view: view, u_alpha: alpha
+    };
+
+    gl.useProgram(defaultProgramInfo.program);
+    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
+    twgl.setUniforms(defaultProgramInfo, uniforms);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+
+    requestAnimationFrame(render);
+  }
+
+  render();
 </script>
 </html>
 
