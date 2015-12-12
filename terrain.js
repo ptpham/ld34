@@ -34,7 +34,8 @@
         var platform = {
           bottom: startHeight,
           thickness: thickness,
-          vertices: []
+          vertices: [],
+          waterVertices: []
         };
 
         formLayer(
@@ -73,13 +74,13 @@
       var y = Math.floor(i / size) * block;
       var section = [layer[i], layer[i+1], layer[size+i+1], layer[size+i]];
 
-      formSection(section, ROCK, x, y, startHeight, block, thickness, attributes.terrain, platform);
-      formSection(section, WATER, x, y, startHeight, block, thickness, attributes.water);
+      formSection(section, ROCK, x, y, startHeight, block, thickness, attributes.terrain, platform.vertices);
+      formSection(section, WATER, x, y, startHeight, block, thickness, attributes.water, platform.waterVertices);
     }
     return attributes;
   }
 
-  function formSection(section, type, x, y, z, block, thickness, attributes, platform) {
+  function formSection(section, type, x, y, z, block, thickness, attributes, platformVertices) {
     var countAll = count(section);
     var countType = count(section, type.value);
 
@@ -89,7 +90,6 @@
 
     var positions = attributes.position;
     var normals = attributes.normal;
-    var platformVertices = platform && platform.vertices;
 
     var face = [];
     var faceMirror = [];
@@ -129,9 +129,7 @@
     _.each(mirrorVertices, function (vertex, i) {
       positions.push.apply(positions, vertex);
       normals.push.apply(normals, mirrorNormal);
-      if (platformVertices) {
-        platformVertices.push(twgl.v3.create.apply(null, vertex));
-      }
+      platformVertices.push(twgl.v3.create.apply(null, vertex));
     });
 
     formSides(face, faceMirror, attributes);
