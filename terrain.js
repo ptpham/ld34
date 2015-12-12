@@ -12,9 +12,9 @@ var layers = [
     0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
     0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
     0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
-    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0,
+    0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+    0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0,
+    0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0,
     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0,
     0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -37,12 +37,31 @@ var layers = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ],
+  [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   ]
 ];
 
 function createTerrainBufferInfo (gl, layers, size) {
-  var HEIGHT = 0.005;
-  var BLOCK_WIDTH = 0.002;
+  var HEIGHT = 0.05;
+  var BLOCK_WIDTH = 0.02;
   var attributes = {
     position: [],
     normal: []
@@ -50,9 +69,10 @@ function createTerrainBufferInfo (gl, layers, size) {
   var vertices = _.map(layers, function (layer, i) {
     formLayer(layer, i, size, BLOCK_WIDTH, HEIGHT, attributes);
   });
+  return twgl.createBufferInfoFromArrays(gl, attributes);
 }
 
-function formLayer (layer, i, size, block, thickness, attributes) {
+function formLayer (layer, index, size, block, thickness, attributes) {
   var positions = attributes.position;
   var normals = attributes.normal;
 
@@ -60,8 +80,8 @@ function formLayer (layer, i, size, block, thickness, attributes) {
   for (var i = 0; i < sections; i++) {
     var x = (i % size) * block;
     var y = Math.floor(i / size) * block;
-    var z = i * thickness;
-    var section = [layer[i], layer[i+1], layer[size+i], layer[size+i+1]];
+    var z = index * thickness;
+    var section = [layer[i], layer[i+1], layer[size+i+1], layer[size+i]];
     formSection(section, x, y, z, block, thickness, attributes);
   }
   return attributes;
