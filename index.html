@@ -51,6 +51,10 @@
     mouseY = e.clientY;
   };
 
+  var keys = { };
+  document.onkeydown = function(e) { keys[e.keyCode] = true; };
+  document.onkeyup = function(e) { delete keys[e.keyCode]; };
+
   function screenToWorld(x, y, invproj, invview, z) {
     var width = canvas.width, height = canvas.height;
     var dx = 2*mouseX/width - 1;
@@ -68,7 +72,7 @@
     gl.viewport(0, 0, width, height);
    
     var target = v3.create(0, 0, 0);
-    var eye = v3.create(10, 0, 0);
+    var eye = v3.create(10, 10, 10);
     var up = v3.create(0, 1, 0);
 
     var position = v3.create(0,3,0);
@@ -83,6 +87,7 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
+    ball.control(keys);
     ball.update();
     ball.getWorld(world);
     var collide = collideLine(ball.position, 1.0, screenNear, direction);
