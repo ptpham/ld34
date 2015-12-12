@@ -72,7 +72,7 @@
     var invview = m4.lookAt(eye, target, up);
     var view = m4.inverse(invview);
     var world = m4.setTranslation(m4.create(), position);
-    var projection = m4.ortho(-aspect*frustum, aspect*frustum, 1, -1, 1, 100);
+    var projection = m4.ortho(-aspect*frustum, aspect*frustum, frustum, -frustum, 1, 100);
     var invproj = m4.inverse(projection);
 
     var screenNear = screenToWorld(mouseX, mouseY, invproj, invview, 0);
