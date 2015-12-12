@@ -23,7 +23,7 @@
     var thicknesses = this.thicknesses;
 
     if (!this.attributes) {
-      var z = 0;
+      var startHeight = 0;
       var attributes = this.attributes = {
         position: [],
         normal: []
@@ -32,13 +32,13 @@
       this.platforms = _.map(layers, function (layer, i) {
         var thickness = (thicknesses[i] || 1) * HEIGHT;
         var platform = {
-          bottom: z, // bottom layer's z-index
+          bottom: startHeight,
           thickness: thickness,
           vertices: []
         };
 
-        formLayer(layer, size, z, BLOCK_WIDTH, thickness, attributes, platform);
-        z += thicknesses[i] * HEIGHT;
+        formLayer(layer, size, startHeight, BLOCK_WIDTH, thickness, attributes, platform);
+        startHeight += thicknesses[i] * HEIGHT;
         return platform;
       });
     }
@@ -50,7 +50,7 @@
     return twgl.createBufferInfoFromArrays(gl, attributes);
   };
 
-  function formLayer (layer, size, z, block, thickness, attributes, platform) {
+  function formLayer (layer, size, startHeight, block, thickness, attributes, platform) {
     var positions = attributes.position;
     var normals = attributes.normal;
 
@@ -59,7 +59,7 @@
       var x = (i % size) * block;
       var y = Math.floor(i / size) * block;
       var section = [layer[i], layer[i+1], layer[size+i+1], layer[size+i]];
-      formSection(section, x, y, z, block, thickness, attributes, platform);
+      formSection(section, x, y, startHeight, block, thickness, attributes, platform);
     }
     return attributes;
   }
@@ -73,20 +73,20 @@
     var face = [];
     var faceMirror = [];
     if (section[0]) {
-      face.push([x, y, z + thickness]);
-      faceMirror.unshift([x, y, z]);
+      face.push([x, z + thickness, y]);
+      faceMirror.unshift([x, z, y]);
     }
     if (section[1]) {
-      face.push([x + block, y, z + thickness]);
-      faceMirror.unshift([x + block, y, z]);
+      face.push([x + block, z + thickness, y]);
+      faceMirror.unshift([x + block, z, y]);
     }
     if (section[2]) {
-      face.push([x + block, y + block, z + thickness]);
-      faceMirror.unshift([x + block, y + block, z]);
+      face.push([x + block, z + thickness, y + block]);
+      faceMirror.unshift([x + block, z, y + block]);
     }
     if (section[3]) {
-      face.push([x, y + block, z + thickness]);
-      faceMirror.unshift([x, y + block, z]);
+      face.push([x, z + thickness, y + block]);
+      faceMirror.unshift([x, z, y + block]);
     }
 
     var normal = getNormal(face);
@@ -101,7 +101,7 @@
 
     _.each(mirrorVertices, function (vertex, i) {
       positions.push.apply(positions, vertex);
-      platformVertices.push.apply(platformVertices, vertex);
+      platformVertices.push(twgl.v3.create.apply(null, vertex));
       normals.push.apply(normals, mirrorNormal);
     });
 

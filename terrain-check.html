@@ -159,7 +159,7 @@
 
   var eye = [0, 1, 1];
   var target = [0, 0, 0];
-  var up = [0, 0, 1];
+  var up = [0, 1, 0];
   var near = 1;
   var far = 100;
 
@@ -189,14 +189,14 @@
   }
 
   function getUniforms (time) {;
-    var world = twgl.m4.rotationZ(time);
+    var world = twgl.m4.rotationY(time);
     var worldView = twgl.m4.multiply(world, view);
     var worldViewProjection = twgl.m4.multiply(world, viewProjection);
 
     return {
       u_near: near,
       u_far: far,
-      u_lightWorldPos: [-3, 3, -8],
+      u_lightWorldPos: [0, 5, 3],
       u_lightColor: [1, 0.9, 0.8, 1],
       u_ambient: [0, 0, 0, 1],
       u_specular: [1, 1, 0.8, 1],
