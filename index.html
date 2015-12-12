@@ -6,6 +6,7 @@
   <script src="underscore-min.js"></script>
   <script src="twgl-full.min.js"></script>
   <script src="collisions.js"></script>
+  <script src="ball.js"></script>
 </head>
 <body>
 
@@ -58,6 +59,8 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
+  var ball = new Ball(v3.create(), 1.0);
+
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     var width = gl.canvas.width, height = gl.canvas.height;
@@ -72,7 +75,7 @@
 
     var invview = m4.lookAt(eye, target, up);
     var view = m4.inverse(invview);
-    var world = m4.translate(m4.create(), position);
+    var world = m4.create();
     var projection = m4.ortho(-aspect*frustum, aspect*frustum, -frustum, frustum, 1, 100);
     var invproj = m4.inverse(projection);
 
@@ -80,7 +83,9 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
-    var collide = collideLine(position, 1.0, screenNear, direction);
+    ball.update();
+    ball.getWorld(world);
+    var collide = collideLine(ball.position, 1.0, screenNear, direction);
 
     var alpha = collide ? 1.0 : 0.5;
 
