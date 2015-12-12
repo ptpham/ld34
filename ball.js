@@ -21,8 +21,12 @@ Object.defineProperty(Ball.prototype, 'forward', {
   }
 });
 
+Object.defineProperty(Ball.prototype, 'volume', { 
+  get: function() { return Math.pow(this.radius, 3); }
+});
+
 Ball.prototype.pushAngular = function(direction, force) {
-  var acceleration = force / Math.pow(this.radius, 3);
+  var acceleration = force / this.volume;
   v3.add(this.angular, v3.mulScalar(direction, acceleration), this.angular);
 };
 
@@ -42,7 +46,9 @@ Ball.prototype.update = function() {
     var forward = this.forward;
     v3.mulScalar(forward, this.radius*theta, forward);
     v3.add(position, forward, position);
-    v3.mulScalar(angular, this.friction, angular);
+    if (v3.lengthSq(angular) > 0.0000001) {
+      v3.mulScalar(angular, this.friction, angular);
+    }
   }
 
   v3.add(position, this.velocity, position);
@@ -70,9 +76,18 @@ Ball.prototype.hitPlane = function(x, normal) {
   var reflex = (1 + this.bounce);
   var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));
   v3.subtract(velocity, remove, velocity);
+};
 
-  // Transfer some angular to velocity
-   
+Ball.prototype.decontact = function(force, ratio) {
+  var angular = this.angular;
+  var amount = v3.length(angular)*ratio*this.radius;
+  var velocity = this.velocity;
+  var forward = this.forward;
+
+  v3.add(velocity, v3.mulScalar(forward, amount), velocity);
+  v3.add(velocity, v3.mulScalar(force, 1/this.volume), velocity);
+  v3.mulScalar(angular, 1.0 - ratio, angular);
+  this.contact = false;
 };
 
 Ball.prototype.contactPlane = function(x, normal) {
@@ -92,7 +107,6 @@ Ball.prototype.contactPlane = function(x, normal) {
     var magnitude = v3.length(velocity)/this.radius;
     v3.mulScalar(v3.normalize(transfer, transfer), magnitude, transfer);
     v3.add(this.angular, transfer, this.angular);
-    console.log(velocity, transfer);
 
     velocity[0] = 0;
     velocity[1] = 0;
@@ -109,7 +123,9 @@ Ball.prototype.control = function(keys) {
   if (keys[68]) yaw -= 0.1;
   
   var angular = this.angular;
-  m4.transformPoint(m4.rotationY(yaw), angular, angular);
+  var yawRotation = m4.rotationY(yaw);
+  m4.transformPoint(yawRotation, angular, angular);
+  m4.multiply(this.rotation, yawRotation, this.rotation);
   this.pushAngular(v3.normalize(angular), force);
 };
 
