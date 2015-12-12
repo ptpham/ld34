@@ -58,7 +58,7 @@
   ];
 
   var terrain = new Terrain(size, layers, thickness);
-  var terrainBufferInfo = terrain.createBufferInfo(gl);
+  var terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
 
   var platform0 = terrain.platforms[0];
   var lookups = _.map(terrain.platforms, function(p) {
@@ -118,9 +118,8 @@
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
       }
-
-      checkLookupXZContact(lookups, ball);
     }
+    checkLookupXZContact(lookups, ball);
 
     ball.control(keys);
     ball.update();

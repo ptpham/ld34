@@ -67,20 +67,25 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
 
   var normals = this.normals;
   for (var i = 0; i < this.count; i++) {
-    var collided = true;
+    var collided = true, closest = null, closestT = 0;
     for (var j = 0; collided && j < 3; j++) {
       var normal = normals[3*i + j];
       var point = this.points[3*i + j];
       var t = intersectPlaneT(c, r, point, normal);
-      collided = collided && (t - r < 0.0);
+      if (closest == null || closestT < t) {
+        closest = normal;
+        closestT = t;
+      }
+      collided = collided && (t - r < 0.0001);
     }
-    if (collided) return true;
+    if (collided) return closest;
   }
 };
 
 function checkLookupXZContact(lookups, ball) {
-  var lower = ball.position[1] - ball.radius;
-  var upper = ball.position[1] + ball.radius;
+  var position = ball.position;
+  var lower = position[1] - ball.radius;
+  var upper = position[1] + ball.radius;
   var up = v3.create(0, 1, 0);
   
   for (var i = 0; i < lookups.length; i++) {
@@ -91,9 +96,21 @@ function checkLookupXZContact(lookups, ball) {
     if (top < lower) return;
 
     var target = v3.create(0, top, 0);
-    if (lookup.collide(ball.position, ball.radius, top)) {
-      ball.hitPlane(target, up);
-      ball.contactPlane(target, up);
+    var contact = lookup.collide(position, ball.radius, top);
+    var switched = (contact != null) ^ ball.contact;
+
+    if (switched && contact != null) {
+      var supported = lookup.collide(position, ball.radius, lower);
+      if (supported) {
+        ball.hitPlane(target, up);
+        ball.contactPlane(target, up);
+      }
+    } else if (switched && contact == null && Math.abs(top - lower) < 0.0001) {
+      ball.decontact(v3.create(), 0.5);
+    } else if (position[1] > bottom && position[1] < top) {
+      var wallCollision = lookup.collide(position, ball.radius, position[1]);
+      if (wallCollision) {
+      }
     }
   }
 }
