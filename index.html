@@ -49,11 +49,12 @@
     mouseY = e.clientY;
   };
 
-  function screenToWorld(x, y, invproj, invview) {
+  function screenToWorld(x, y, invproj, invview, z) {
     var width = canvas.width, height = canvas.height;
     var dx = 2*mouseX/width - 1;
     var dy = 1 - 2*mouseY/height;
-    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, 0]));
+    z = z || 0;
+    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
   function render() {
@@ -71,15 +72,15 @@
     var invview = m4.lookAt(eye, target, up);
     var view = m4.inverse(invview);
     var world = m4.setTranslation(m4.create(), position);
-    var projection = m4.perspective(Math.PI/2, aspect, 1, 100);
+    var projection = m4.ortho(-aspect*frustum, aspect*frustum, 1, -1, 1, 100);
     var invproj = m4.inverse(projection);
 
-    var screen = screenToWorld(mouseX, mouseY, invproj, invview);
-    var direction = v3.normalize(v3.subtract(eye, screen));
-    console.log(screen);
+    var screenNear = screenToWorld(mouseX, mouseY, invproj, invview, 0);
+    var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
+    var direction = v3.normalize(v3.subtract(screenFar, screenNear));
     console.log(direction);
 
-    var collide = collideLine(position, 1.0, screen, direction);
+    var collide = collideLine(position, 1.0, screenNear, direction);
     var alpha = collide ? 1.0 : 0.5;
 
     var uniforms = {
