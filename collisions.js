@@ -1,4 +1,8 @@
 
+var v3 = twgl.v3, m4 = twgl.m4;
+var rotateN90Y = m4.rotationY(-Math.PI/2);
+var rotate90Y = m4.rotationY(Math.PI/2);
+
 function distanceSq(a, b) {
   return v3.lengthSq(v3.subtract(a, b));
 }
@@ -35,4 +39,40 @@ function collideLine(c, r, x, d) {
 function collidePlane(c, r, x, d) {
   return collideLine(x, r, c, d);
 }
+
+function TriangleLookupXZ(points, y, thickness) {
+  this.points = points;
+  var normals = [];
+
+  var count = points.length/3;
+  for (var i = 0; i < count; i++) {
+    for (var j = 0; j < 3; j++) {
+      var target = points[3*i + j];
+      var next = points[3*i + (j + 1)%3];
+      var diff = v3.subtract(next, target);
+      normals.push(m4.transformPoint(rotate90Y, diff));
+    }
+  }
+
+  this.normals = normals;
+  this.count = count;
+};
+
+TriangleLookupXZ.prototype.collide = function(c, r, y) {
+  var deltaY = Math.abs(c[1] - y);
+  if (deltaY < r) r = Math.sqrt(r*r - deltaY*deltaY);
+  else r = 0;
+
+  var normals = this.normals;
+  for (var i = 0; i < this.count; i++) {
+    var collided = true;
+    for (var j = 0; collided && j < 3; j++) {
+      var normal = normals[3*i + j];
+      var point = this.points[3*i + j];
+      var t = intersectPlaneT(c, r, point, normal);
+      collided = collided && (t - r < 0.0);
+    }
+    if (collided) return true;
+  }
+};
 
