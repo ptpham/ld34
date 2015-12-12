@@ -16,3 +16,7 @@ function collideLine(c, r, x, d) {
   return distanceSq(closest, c) < r*r;
 }
 
+function collidePlane(c, r, x, d) {
+  return collideLine(x, r, c, d);
+}
+

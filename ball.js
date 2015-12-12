@@ -38,12 +38,29 @@ Ball.prototype.update = function() {
   v3.mulScalar(forward, this.radius*theta, forward);
   v3.add(position, forward, position);
   v3.mulScalar(angular, 0.99, angular);
+
+  v3.add(position, this.velocity, position);
 };
 
 Ball.prototype.getWorld = function(world) {
   m4.identity(world);
   m4.translate(world, this.position, world);
   m4.multiply(this.rotation, world, world);
+};
+
+Ball.prototype.hitPlane = function(x, normal) {
+  // Prevent the ball from intersecting the plane
+  var delta = v3.subtract(this.position, x);
+  v3.normalize(delta, delta);
+  if (!Number.isNaN(delta[0])) {
+    v3.mulScalar(delta, this.radius, delta);
+    v3.add(x, delta, this.position);
+  }
+
+  // Zero out velocity orthgonal to plane
+  var velocity = this.velocity;
+  var remove = v3.mulScalar(normal, v3.dot(normal, this.velocity));
+  v3.subtract(velocity, remove, velocity);
 };
 
 Ball.prototype.control = function(keys) {

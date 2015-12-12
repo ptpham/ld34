@@ -44,6 +44,8 @@
   var gl = twgl.getWebGLContext(canvas);
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
+
+  var GRAVITY = v3.create(0, -0.01, 0);
   
   var mouseX = 0, mouseY = 0;
   canvas.onmousemove = function(e) {
@@ -63,7 +65,7 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
-  var ball = new Ball(v3.create(), 1.0);
+  var ball = new Ball(v3.create(0, 5, 0), 1.0);
 
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -87,11 +89,19 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
+    if (!ball.contact) {
+      v3.add(ball.velocity, GRAVITY, ball.velocity);
+      if (ball.position[1] < ball.radius) {
+        ball.hitPlane(target, up);
+        ball.contact = true;
+      }
+    }
+
     ball.control(keys);
     ball.update();
     ball.getWorld(world);
-    var collide = collideLine(ball.position, 1.0, screenNear, direction);
 
+    var collide = collideLine(ball.position, 1.0, screenNear, direction);
     var alpha = collide ? 1.0 : 0.5;
 
     var uniforms = {
