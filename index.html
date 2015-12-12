@@ -8,6 +8,44 @@
 </head>
 <body>
 
+<script id="default-vs" type="x-shader/v-shader">
+  attribute vec3 position;
+
+  void main() {
+    gl_Position = vec4(position, 1.0);
+  }
+</script>
+
+<script id="default-fs" type="x-shader/f-shader">
+  precision mediump float;
+
+  void main() {
+    gl_FragColor = vec4(0.0, 1.0, 0.5, 1.0);
+  }
+</script>
+
+<style>
+  canvas { width: 100%; height: 100%; }
+</style>
+  <progress id="waterBar" value="100"></progress>
+  <canvas id="canvas"></canvas>
 </body>
+<script>
+  var gl = twgl.getWebGLContext(canvas);
+  var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
+  var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
+
+  twgl.resizeCanvasToDisplaySize(gl.canvas);
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+  var uniforms = {
+    resolution: [gl.canvas.width, gl.canvas.height],
+  };
+
+  gl.useProgram(defaultProgramInfo.program);
+  twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
+  twgl.setUniforms(defaultProgramInfo, uniforms);
+  twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+</script>
 </html>
 
