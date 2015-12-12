@@ -40,8 +40,10 @@ function collidePlane(c, r, x, d) {
   return collideLine(x, r, c, d);
 }
 
-function TriangleLookupXZ(points, y, thickness) {
+function TriangleLookupXZ(points, bottom, thickness) {
+  this.thickness = thickness;
   this.points = points;
+  this.bottom = bottom;
   var normals = [];
 
   var count = points.length/3;
@@ -75,4 +77,24 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
     if (collided) return true;
   }
 };
+
+function checkLookupXZContact(lookups, ball) {
+  var lower = ball.position[1] - ball.radius;
+  var upper = ball.position[1] + ball.radius;
+  var up = v3.create(0, 1, 0);
+  
+  for (var i = 0; i < lookups.length; i++) {
+    var lookup = lookups[lookups.length - i - 1];
+    var bottom = lookup.bottom;
+    var top = bottom + lookup.thickness;
+    if (bottom > upper) return;
+    if (top < lower) return;
+
+    var target = v3.create(0, top, 0);
+    if (lookup.collide(ball.position, ball.radius, top)) {
+      ball.hitPlane(target, up);
+      ball.contactPlane(target, up);
+    }
+  }
+}
 

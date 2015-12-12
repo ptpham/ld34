@@ -61,8 +61,9 @@
   var terrainBufferInfo = terrain.createBufferInfo(gl);
 
   var platform0 = terrain.platforms[0];
-  var triangleLookup = new TriangleLookupXZ(platform0.vertices, 
-    platform0.bottom, platform0.thickness);
+  var lookups = _.map(terrain.platforms, function(p) {
+    return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
+  });
 
   var GRAVITY = v3.create(0, -0.01, 0);
   
@@ -111,16 +112,14 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
-    if (ball.position[1] > ball.radius) {
-      ball.contact = false;
-    }
-
     if (!ball.contact) {
       v3.add(ball.velocity, GRAVITY, ball.velocity);
       if (ball.position[1] < ball.radius) {
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
       }
+
+      checkLookupXZContact(lookups, ball);
     }
 
     ball.control(keys);
