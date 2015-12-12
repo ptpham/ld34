@@ -9,6 +9,7 @@ function Ball(position, radius) {
   this.rotation = m4.create();
   this.position = position;
   this.radius = radius;
+  this.friction = 0.99;
   this.bounce = 0.3;
 }
 
@@ -29,16 +30,20 @@ Ball.prototype.update = function() {
   var angular = this.angular;
   var position = this.position;
   var rotation = this.rotation;
+  var velocity = this.velocity;
 
   var theta = v3.length(angular);
   var delta = m4.axisRotation(angular, theta);
   m4.multiply(delta, rotation, rotation);
 
-  // Move the ball forward and dampen angular when in contact with the ground
-  var forward = this.forward;
-  v3.mulScalar(forward, this.radius*theta, forward);
-  v3.add(position, forward, position);
-  v3.mulScalar(angular, 0.99, angular);
+  // Move the ball forward and dampen angular and velocity
+  // when in contact with the ground.
+  if (this.contact) {
+    var forward = this.forward;
+    v3.mulScalar(forward, this.radius*theta, forward);
+    v3.add(position, forward, position);
+    v3.mulScalar(angular, this.friction, angular);
+  }
 
   v3.add(position, this.velocity, position);
 };
@@ -49,33 +54,49 @@ Ball.prototype.getWorld = function(world) {
   m4.multiply(this.rotation, world, world);
 };
 
+// Prevents the ball from intersecting the plane
+Ball.prototype.attachPlane = function(x, normal) {
+  var position = this.position
+  var t = intersectPlaneT(position, this.radius, x, normal);
+  var shift = v3.mulScalar(normal, t + this.radius);
+  v3.add(position, shift, position);
+};
+
 Ball.prototype.hitPlane = function(x, normal) {
-  // Prevent the ball from intersecting the plane
-  var delta = v3.subtract(this.position, x);
-  v3.normalize(delta, delta);
-  if (!Number.isNaN(delta[0])) {
-    v3.mulScalar(delta, this.radius, delta);
-    v3.add(x, delta, this.position);
-  }
+  this.attachPlane(x, normal);
 
   // Reflect velocity orthgonal to plane
   var velocity = this.velocity;
   var reflex = (1 + this.bounce);
   var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));
   v3.subtract(velocity, remove, velocity);
+
+  // Transfer some angular to velocity
+   
 };
 
 Ball.prototype.contactPlane = function(x, normal) {
   var velocity = this.velocity;
   var position = this.position;
+
   if (v3.dot(velocity, normal) < 0.01) {
+    // Remove component normal to plane
     this.contact = true;
-    this.position[1] = x[1] + this.radius;
-    var t = intersectPlaneT(this.position, this.radius, x, normal);
-    var shift = v3.mulScalar(normal, t + this.radius);
-    v3.add(position, shift, position);
+    this.attachPlane(x, normal);
     var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
     v3.subtract(velocity, remove, velocity);
+
+    // Convert rest to angular
+    var transfer = m4.transformPoint(
+      m4.axisRotation(normal, Math.PI/2), velocity);
+    var magnitude = v3.length(velocity)/this.radius;
+    v3.mulScalar(v3.normalize(transfer, transfer), magnitude, transfer);
+    v3.add(this.angular, transfer, this.angular);
+    console.log(velocity, transfer);
+
+    velocity[0] = 0;
+    velocity[1] = 0;
+    velocity[2] = 0;
   }
 };
 
