@@ -9,6 +9,7 @@ function Ball(position, radius) {
   this.rotation = m4.create();
   this.position = position;
   this.radius = radius;
+  this.bounce = 0.3;
 }
 
 Object.defineProperty(Ball.prototype, 'forward', {
@@ -57,10 +58,25 @@ Ball.prototype.hitPlane = function(x, normal) {
     v3.add(x, delta, this.position);
   }
 
-  // Zero out velocity orthgonal to plane
+  // Reflect velocity orthgonal to plane
   var velocity = this.velocity;
-  var remove = v3.mulScalar(normal, v3.dot(normal, this.velocity));
+  var reflex = (1 + this.bounce);
+  var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));
   v3.subtract(velocity, remove, velocity);
+};
+
+Ball.prototype.contactPlane = function(x, normal) {
+  var velocity = this.velocity;
+  var position = this.position;
+  if (v3.dot(velocity, normal) < 0.01) {
+    this.contact = true;
+    this.position[1] = x[1] + this.radius;
+    var t = intersectPlaneT(this.position, this.radius, x, normal);
+    var shift = v3.mulScalar(normal, t + this.radius);
+    v3.add(position, shift, position);
+    var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
+    v3.subtract(velocity, remove, velocity);
+  }
 };
 
 Ball.prototype.control = function(keys) {
