@@ -166,7 +166,6 @@ function checkLookupXZContact(lookups, ball) {
       if (supported) {
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
-        handled = true;
       } else if (contact.length > 2) {
         var coeff = radius*radius - contact[2]*contact[2];
         if (coeff > 0) {
@@ -179,9 +178,9 @@ function checkLookupXZContact(lookups, ball) {
           var volume = ball.volume;
           v3.add(ball.angular, v3.mulScalar(ball.angular, yvel, tempV3), ball.angular);
         }
-        handled = true;
       }
-    } else {
+      handled = true;
+    } else if (!handled) {
       if ((position[1] > bottom && position[1] < top) && (!contact || !contact.length)) {
         contact = lookup.collide(position, ball.radius, position[1]);
       }

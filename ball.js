@@ -155,14 +155,7 @@ Ball.prototype.contactPlane = function(x, normal) {
   }
 };
 
-Ball.prototype.control = function(keys) {
-  // w = 87, s = 83, a = 65, d = 68
-  var yaw = 0, force = 0;
-  if (keys[87]) force += 0.01;
-  if (keys[83]) force -= 0.01;
-  if (keys[65]) yaw += 0.1;
-  if (keys[68]) yaw -= 0.1;
-  
+Ball.prototype.nudgeAngular = function() {
   var angular = this.angular;
   if (v3.lengthSq(angular) < 0.000001) {
     randomV3(angular);
@@ -170,7 +163,18 @@ Ball.prototype.control = function(keys) {
     v3.normalize(angular, angular);
     v3.mulScalar(angular, 0.001, angular);
   }
+};
 
+Ball.prototype.controlDirected = function(keys) {
+  // w = 87, s = 83, a = 65, d = 68
+  var yaw = 0, force = 0;
+  if (keys[87]) force += 0.01;
+  if (keys[83]) force -= 0.01;
+  if (keys[65]) yaw += 0.1;
+  if (keys[68]) yaw -= 0.1;
+  var angular = this.angular;
+
+  this.nudgeAngular();
   var yawRotation = m4.rotationY(yaw);
   m4.transformPoint(yawRotation, angular, angular);
   m4.multiply(this.rotation, yawRotation, this.rotation);
@@ -182,3 +186,21 @@ Ball.prototype.control = function(keys) {
     v3.add(velocity, v3.mulScalar(this.forward, force/2), velocity);
   }
 };
+
+Ball.prototype.controlFixed = function(keys, cardinals) {
+  // w = 87, s = 83, a = 65, d = 68
+  var target = v3.create();
+  if (keys[87]) v3.add(target, cardinals[0], target);
+  if (keys[83]) v3.add(target, cardinals[2], target);
+  if (keys[65]) v3.add(target, cardinals[1], target);
+  if (keys[68]) v3.add(target, cardinals[3], target);
+  
+  if (v3.lengthSq(target) < 0.0001) return;
+  v3.normalize(target, target);
+    
+  var force = 0.1, weight = this.radius;
+  var angular = m4.transformPoint(rotate90Y, target);
+  v3.mulScalar(angular, force/weight, this.angular);
+  v3.mulScalar(target, force/weight, this.velocity);
+};
+
