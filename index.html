@@ -151,12 +151,12 @@
 
       // Soak up water from water layers
       _.each(waterLookups, function(lookup) {
-        if (lookup.waterRemain <= 0) return;
+        if (!lookup.waterRemain || lookup.waterRemain <= 0) return;
         var collision = lookup.collide(ball.position,
           ball.radius, ball.position[1] - ball.radius);
         if (collision) {
           var waterRemain = lookup.waterRemain;
-          var absorption = Math.min(0.5*waterRemain, 0.01);
+          var absorption = 0.001*waterRemain;
           if (waterRemain < 0.001) absorption = waterRemain;
           lookup.waterRemain -= absorption;
           ball.grow(absorption);
@@ -211,9 +211,20 @@
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
     uniforms.u_color = [0.0, 0.2, 0.6, 1.0];
-    twgl.setUniforms(defaultProgramInfo, uniforms);
-    _.each(waterBufferInfos, function (waterBufferInfo) {
+    tempV3[0] = 0;
+    tempV3[2] = 0;
+    _.each(waterBufferInfos, function (waterBufferInfo, i) {
       if (!waterBufferInfo) return;
+      var lookup = waterLookups[i];
+      m4.identity(world);
+      tempV3[1] = -lookup.bottom;
+      m4.translate(world, tempV3, world);
+      m4.scale(world, v3.create(1, lookup.waterRemain / lookup.waterTotal, 1), world);
+      tempV3[1] = lookup.bottom;
+      m4.translate(world, tempV3, world);
+      uniforms.u_world = world;
+
+      twgl.setUniforms(defaultProgramInfo, uniforms);
       twgl.setBuffersAndAttributes(gl, defaultProgramInfo, waterBufferInfo);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
     });
