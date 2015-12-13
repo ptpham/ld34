@@ -178,6 +178,7 @@ function checkLookupXZContact(lookups, ball) {
           var downward = Math.sqrt(coeff);
           var delta = top - (position[1] - downward);
           position[1] += delta;
+          ball.velocity[1] = 0;
         }
       }
     } else if (switched && Math.abs(top - lower) < 0.0001) {
