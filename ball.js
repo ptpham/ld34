@@ -79,13 +79,14 @@ Ball.prototype.update = function() {
     }
   }
 
-  v3.add(position, this.velocity, position);
+  v3.add(position, velocity, position);
+  v3.mulScalar(velocity, this.friction, velocity);
 };
 
 Ball.prototype.grow = function(amount) {
-  var radius = Math.pow(this.volume + amount, 1/3);
-  this.position[1] = radius - this.radius;
-  this.radius = radius;
+  var updated = Math.pow(this.volume + amount, 1/3);
+  this.position[1] += updated - this.radius;
+  this.radius = updated;
 };
 
 Ball.prototype.getWorld = function(world) {
@@ -201,6 +202,9 @@ Ball.prototype.controlFixed = function(keys, cardinals) {
   var force = 0.1, weight = this.radius;
   var angular = m4.transformPoint(rotate90Y, target);
   v3.mulScalar(angular, force/weight, this.angular);
+
+  var yvel = this.velocity[1];
   v3.mulScalar(target, force/weight, this.velocity);
+  this.velocity[1] = yvel;
 };
 
