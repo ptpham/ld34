@@ -41,44 +41,81 @@ function collidePlane(c, r, x, d) {
 }
 
 function TriangleLookupXZ(points, bottom, thickness) {
+  var normals = [], centers = [], lengths = [];
+  var directions = [];
   this.thickness = thickness;
   this.points = points;
   this.bottom = bottom;
-  var normals = [];
 
   var count = points.length/3;
   for (var i = 0; i < count; i++) {
+
+    var sum = v3.create();
     for (var j = 0; j < 3; j++) {
       var target = points[3*i + j];
       var next = points[3*i + (j + 1)%3];
       var diff = v3.subtract(next, target);
-      normals.push(m4.transformPoint(rotate90Y, diff));
+      var length = v3.length(diff);
+      v3.normalize(diff, diff);
+
+      directions.push(diff);
+      normals.push(m4.transformPoint(rotateN90Y, diff));
+      lengths.push(length);
+      v3.add(sum, target, sum);
     }
+    
+    centers.push(v3.normalize(sum, sum));
   }
 
+  this.directions = directions;
+  this.lengths = lengths;
+  this.centers = centers;
   this.normals = normals;
   this.count = count;
 };
+
+var tempV3 = v3.create();
 
 TriangleLookupXZ.prototype.collide = function(c, r, y) {
   var deltaY = Math.abs(c[1] - y);
   if (deltaY < r) r = Math.sqrt(r*r - deltaY*deltaY);
   else r = 0;
 
+  var rSquared = r*r;
   var normals = this.normals;
+  var diff = v3.create();
   for (var i = 0; i < this.count; i++) {
-    var collided = true, closest = null, closestT = 0;
-    for (var j = 0; collided && j < 3; j++) {
-      var normal = normals[3*i + j];
-      var point = this.points[3*i + j];
-      var t = intersectPlaneT(c, r, point, normal);
-      if (closest == null || closestT < t) {
-        closest = normal;
-        closestT = t;
+    var collided = false, contained = true;
+    for (var j = 0; !collided && j < 3; j++) {
+      var index = 3*i + j;
+      var normal = normals[index];
+      var point = this.points[index];
+
+      // Check point contained in circle
+      v3.subtract(point, c, diff);
+      diff[1] = 0;
+      if (v3.lengthSq(diff) < rSquared) {
+        var center = this.centers[i];
+        var diff = v3.subtract(c, center);
+        diff[1] = 0;
+        return [point, v3.normalize(diff, diff)];
       }
-      collided = collided && (t - r < 0.0001);
+
+      // Continue checking containment of circle in triangle
+      var t = intersectPlaneT(c, r, point, normal);
+      contained = contained && t > -0.0001;
+
+      // Check edge intersections
+      v3.mulScalar(normal, -t, tempV3);
+      v3.add(c, tempV3, tempV3);
+      v3.subtract(tempV3, point, tempV3);
+      var dot = v3.dot(tempV3, this.directions[index]);
+      if (Math.abs(t) < r && dot > 0 && dot < this.lengths[index]) {
+        return [point, normal, t];
+      }
     }
-    if (collided) return closest;
+
+    if (contained) return true;
   }
 };
 
@@ -104,12 +141,17 @@ function checkLookupXZContact(lookups, ball) {
       if (supported) {
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
+      } else if (contact && contact.length > 2) {
+        v3.add(ball.position, v3.mulScalar(contact[1], -contact[2]));
       }
-    } else if (switched && contact == null && Math.abs(top - lower) < 0.0001) {
+    } else if (switched && Math.abs(top - lower) < 0.0001) {
       ball.decontact(v3.create(), 0.5);
     } else if (position[1] > bottom && position[1] < top) {
-      var wallCollision = lookup.collide(position, ball.radius, position[1]);
-      if (wallCollision) {
+      if (!contact || !contact.length) {
+        contact = lookup.collide(position, ball.radius, position[1]);
+      }
+      if (contact) {
+        ball.hitPlane(contact[0], contact[1]); 
       }
     }
   }

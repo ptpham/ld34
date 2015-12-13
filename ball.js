@@ -61,19 +61,19 @@ Ball.prototype.getWorld = function(world) {
 };
 
 // Prevents the ball from intersecting the plane
-Ball.prototype.attachPlane = function(x, normal) {
+Ball.prototype.attachPlane = function(x, normal, epsilon) {
   var position = this.position
   var t = intersectPlaneT(position, this.radius, x, normal);
-  console.log(this.position, normal, t);
   if (t < -this.radius) return;
 
-  var shift = v3.mulScalar(normal, t + this.radius);
+  epsilon = epsilon || 0;
+  var shift = v3.mulScalar(normal, t + this.radius + epsilon);
   v3.add(position, shift, position);
 };
 
 // Reflect velocity orthgonal to plane
-Ball.prototype.hitPlane = function(x, normal) {
-  this.attachPlane(x, normal); 
+Ball.prototype.hitPlane = function(x, normal, epsilon) {
+  this.attachPlane(x, normal, epsilon); 
   var velocity = this.velocity;
   var reflex = (1 + this.bounce);
   var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));
