@@ -174,7 +174,6 @@ function checkLookupXZContact(lookups, ball) {
       var supported = lookup.collide(position, ball.radius, lower);
       if (supported) console.log('supported');
       if (supported) {
-        ball.attachPlane(target, up);
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
       } else if (contact.length > 2) {
@@ -201,8 +200,8 @@ function checkLookupXZContact(lookups, ball) {
           var velocity = ball.velocity;
           var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
           v3.subtract(velocity, remove, velocity);
+          v3.mulScalar(normal, v3.dot(ball.angular, normal), ball.angular);
         } else {
-          ball.attachPlane(contact[0], contact[1]);
           ball.hitPlane(contact[0], contact[1]); 
         }
       }
