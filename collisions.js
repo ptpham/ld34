@@ -118,7 +118,6 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
           current[2] = dotBackward;
         }
         
-        console.log(current[2]);
         if (corner == null || corner[2] < current[2]) corner = current;
       }
 
@@ -139,7 +138,6 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
       var margin = v3.dot(tempV3, this.directions[index]);
 
       if (Math.abs(t) < r && dot > 0 && dot < this.lengths[index]) {
-        console.log("edge", point, normal, t);
         return [point, normal, t];
       }
     }
@@ -147,7 +145,6 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
   }
 
   if (corner) {
-    console.log('corner', corner);
     return corner;
   }
 };
@@ -172,7 +169,6 @@ function checkLookupXZContact(lookups, ball) {
 
     if (contact != null) {
       var supported = lookup.collide(position, ball.radius, lower);
-      if (supported) console.log('supported');
       if (supported) {
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
@@ -181,7 +177,6 @@ function checkLookupXZContact(lookups, ball) {
         if (coeff > 0) {
           var downward = Math.sqrt(coeff);
           var delta = top - (position[1] - downward);
-          console.log(delta);
           position[1] += delta;
         }
       }
