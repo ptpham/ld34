@@ -130,7 +130,7 @@
       if (collide) {
         hoverBall = ball;
         if (dblClick) {
-          balls.push(ball.split());
+          level.addBall(ball.split());
         } else if (mouseEvent && mouseDown) {
           level.activateBall(i);
         }

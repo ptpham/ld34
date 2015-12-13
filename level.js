@@ -42,9 +42,13 @@
   };
 
   Level.prototype.addBall = function (start, radius) {
-    var position = v3.create();
-    this.setStartPosition(start, position);
-    this.balls.push(new Ball(position, radius));
+    if (start instanceof Ball) {
+      this.balls.push(start);
+    } else {
+      var position = v3.create();
+      this.setStartPosition(start, position);
+      this.balls.push(new Ball(position, radius));
+    }
   };
 
   Level.prototype.activateBall = function (index) {
