@@ -151,6 +151,14 @@
       twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
     });
 
+    _.each(level.goals, function (goal) {
+      level.getGoalWorld(world, goal);
+      uniforms.u_world = world;
+      uniforms.u_color = [1.0, 0.2, 0.2, 1.0];
+      twgl.setUniforms(defaultProgramInfo, uniforms);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+    });
+
     twgl.setBuffersAndAttributes(gl, defaultProgramInfo, terrainBufferInfo);
     uniforms.u_color = [0.6, 0.6, 0.0, 1.0];
     uniforms.u_world = m4.create();

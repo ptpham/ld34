@@ -75,6 +75,12 @@
     };
   };
 
+  Level.prototype.getGoalWorld = function (world, goal) {
+    m4.identity(world);
+    m4.translate(world, goal.position, world);
+    m4.scale(world, [goal.radius, goal.radius, goal.radius], world);
+  };
+
   root.Level = Level;
 
   Level.list = [];
