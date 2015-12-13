@@ -75,7 +75,8 @@
   var GRAVITY = v3.create(0, -0.01, 0);
 
   var levelIndex = 1;
-  var level, balls, terrain, platform0, lookups;
+  var level, balls, terrain;
+  var terrainLookups, waterLookups, terrainBufferInfo, waterBufferInfo;
   var completeTriggered;
 
   startLevel(levelIndex);
@@ -140,13 +141,27 @@
     var hoverBall = null;
     checkInterballCollisions(balls);
     _.each(balls, function(ball, i) {
+      // Control the active ball with keys
+      if (ball == level.ball) ball.controlFixed(keys, cardinals);
+
       // Accelerate with gravity
       if (!ball.contact) {
         v3.add(ball.velocity, GRAVITY, ball.velocity);
       }
 
-      // Control the active ball with keys
-      if (ball == level.ball) ball.controlFixed(keys, cardinals);
+      // Soak up water from water layers
+      _.each(waterLookups, function(lookup) {
+        if (lookup.waterRemain <= 0) return;
+        var collision = lookup.collide(ball.position,
+          ball.radius, ball.position[1] - ball.radius);
+        if (collision) {
+          var waterRemain = lookup.waterRemain;
+          var absorption = Math.min(0.5*waterRemain, 0.01);
+          if (waterRemain < 0.001) absorption = waterRemain;
+          lookup.waterRemain -= absorption;
+          ///ball.grow(absorption);
+        }
+      });
 
       // Check what the mouse is hovering over
       var collide = collideLine(ball.position, ball.radius, screenNear, direction);
@@ -161,7 +176,8 @@
 
       // Update physics
       ball.update();
-      checkLookupXZContact(lookups, ball);
+      checkLookupXZContact(terrainLookups, ball);
+
     });
 
     level.update();
@@ -193,6 +209,11 @@
     uniforms.u_world = m4.create();
     twgl.setUniforms(defaultProgramInfo, uniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
+
+    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, waterBufferInfo);
+    uniforms.u_color = [0.0, 0.2, 0.6, 1.0];
+    twgl.setUniforms(defaultProgramInfo, uniforms);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
 
     requestAnimationFrame(render);
     mouseEvent = false;
@@ -227,10 +248,16 @@
     level.reset();
     terrain = level.terrain;
     terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
+    waterBufferInfo = terrain.createWaterBufferInfo(gl);
 
-    platform0 = terrain.platforms[0];
-    lookups = _.map(terrain.platforms, function(p) {
+    terrainLookups = _.map(terrain.platforms, function(p) {
       return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
+    });
+
+    waterLookups = _.map(terrain.platforms, function(p) {
+      var result = new TriangleLookupXZ(p.waterVertices, p.bottom, p.thickness);
+      result.waterRemain = result.waterTotal = p.thickness * p.waterVertices.length / 6;
+      return result;
     });
 
     balls = level.balls;
