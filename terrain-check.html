@@ -140,10 +140,10 @@
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var waterProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "water-fs"]);
 
-  var level = Level.get(0);
+  var level = Level.get(1);
   var terrain = level.terrain;
   var terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
-  var waterBufferInfo = terrain.createWaterBufferInfo(gl);
+  var waterBufferInfos = terrain.createWaterBufferInfos(gl);
 
   var eye = level.eye;
   var target = level.target;
@@ -173,12 +173,13 @@
     twgl.setUniforms(defaultProgramInfo, uniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
-    if (waterBufferInfo) {
-      gl.useProgram(waterProgramInfo.program);
+    gl.useProgram(waterProgramInfo.program);
+    twgl.setUniforms(waterProgramInfo, uniforms);
+    _.each(waterBufferInfos, function (waterBufferInfo) {
+      if (!waterBufferInfo) return;
       twgl.setBuffersAndAttributes(gl, waterProgramInfo, waterBufferInfo);
-      twgl.setUniforms(waterProgramInfo, uniforms);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
-    }
+    });
 
     requestAnimationFrame(render);
   }

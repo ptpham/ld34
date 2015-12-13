@@ -30,7 +30,7 @@
       var startHeight = 0;
       var attributes = this.attributes = {
         terrain: {position: [], normal: []},
-        water: {position: [], normal: []}
+        water: []
       };
 
       this.platforms = _.map(this.layers, function (layer, i) {
@@ -62,11 +62,13 @@
     }
   };
 
-  Terrain.prototype.createWaterBufferInfo = function (gl) {
-    var attributes = this.getAttributes().water;
-    if (attributes.position.length) {
-      return twgl.createBufferInfoFromArrays(gl, attributes);
-    }
+  Terrain.prototype.createWaterBufferInfos = function (gl) {
+    var waterAttributes = this.getAttributes().water;
+    return _.map(waterAttributes, function (attributes) {
+      if (attributes.position.length) {
+        return twgl.createBufferInfoFromArrays(gl, attributes);
+      }
+    });
   };
 
   var ROCK = {value: 1, fill: false};
@@ -75,6 +77,9 @@
   function formLayer(layer, size, startHeight, block, thickness, attributes, platform) {
     var positions = attributes.position;
     var normals = attributes.normal;
+    var waterAttributes = {position: [], normal: []};
+
+    attributes.water.push(waterAttributes);
 
     var last = size-1;
     var sections = layer.length-size-1;
@@ -86,7 +91,7 @@
       var section = [layer[i], layer[i+1], layer[size+i+1], layer[size+i]];
 
       formSection(section, ROCK, x, y, startHeight, block, thickness, attributes.terrain, platform.vertices);
-      formSection(section, WATER, x, y, startHeight, block, thickness, attributes.water, platform.waterVertices);
+      formSection(section, WATER, x, y, startHeight, block, thickness, waterAttributes, platform.waterVertices);
     }
     return attributes;
   }
