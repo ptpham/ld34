@@ -75,9 +75,10 @@
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
   document.onkeyup = function(e) { delete keys[e.keyCode]; };
 
-  var mouseDown = false, mouseEvent = false;
+  var mouseDown = false, mouseEvent = false, dblClick = false;
   document.onmousedown = function(e) { mouseEvent = true; mouseDown = true; };
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
+  document.ondblclick = function(e) { dblClick = true; };
 
   function screenToWorld(x, y, invproj, invview, z) {
     var width = canvas.width, height = canvas.height;
@@ -128,7 +129,9 @@
       var collide = collideLine(ball.position, ball.radius, screenNear, direction);
       if (collide) {
         hoverBall = ball;
-        if (mouseEvent && mouseDown) {
+        if (dblClick) {
+          balls.push(ball.split());
+        } else if (mouseEvent && mouseDown) {
           level.activateBall(i);
         }
       }
@@ -168,6 +171,7 @@
 
     requestAnimationFrame(render);
     mouseEvent = false;
+    dblClick = false;
   }
 
   render();
