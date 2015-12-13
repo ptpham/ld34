@@ -7,7 +7,7 @@ var levels = [];
 
 var directories = fs.readdirSync(levelDir);
 directories = _.reject(directories, function (dir) {
-  return (dir === '.DS_Store');
+  return (dir === '.DS_Store' || dir === 'levels.js');
 });
 var numLevels = directories.length;
 
@@ -27,8 +27,6 @@ function extractLevel (name, path, files, index) {
   _.each(files, function (filename) {
     if (filename.substr(-5) === '.json') {
       config = require(path + '/' + filename);
-      level.width = config.width;
-      level.height = config.height;
       if (image) doContinue();
     }
 
@@ -39,9 +37,7 @@ function extractLevel (name, path, files, index) {
   });
 
   function doContinue () {
-    level.name = config.name;
-    level.width = config.width;
-    level.height = config.height;
+    _.extend(level, config);
     parseLevel(image, config, level, index);
   }
 }
@@ -89,7 +85,7 @@ function levelReady(index, level) {
   finishedLevels++;
   levels[index] = level;
 
-  if (finishedLevels === numLevels - 1) {
+  if (finishedLevels === numLevels) {
     var data = 'var levels = ' + JSON.stringify(levels) + ';'; 
     fs.writeFile(levelDir + '/levels.js', data);
   }

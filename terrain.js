@@ -13,14 +13,18 @@
 
   root.Terrain = Terrain;
 
+  Terrain.HEIGHT = 1;
+  Terrain.BLOCK_WIDTH = 5;
+
   Terrain.prototype.getPlatform = function (layer) {
     return this.platforms[layer];
   };
 
   Terrain.prototype.getAttributes = function () {
-    var HEIGHT = 1;
-    var BLOCK_WIDTH = 5;
+    var HEIGHT = Terrain.HEIGHT;
+    var BLOCK_WIDTH = Terrain.BLOCK_WIDTH;
     var thicknesses = this.thicknesses;
+    var size = this.size;
 
     if (!this.attributes) {
       var startHeight = 0;
@@ -29,7 +33,7 @@
         water: {position: [], normal: []}
       };
 
-      this.platforms = _.map(layers, function (layer, i) {
+      this.platforms = _.map(this.layers, function (layer, i) {
         var thickness = (thicknesses[i] || 1) * HEIGHT;
         var platform = {
           bottom: startHeight,
@@ -53,12 +57,16 @@
 
   Terrain.prototype.createTerrainBufferInfo = function (gl) {
     var attributes = this.getAttributes().terrain;
-    return twgl.createBufferInfoFromArrays(gl, attributes);
+    if (attributes.position.length) {
+      return twgl.createBufferInfoFromArrays(gl, attributes);
+    }
   };
 
   Terrain.prototype.createWaterBufferInfo = function (gl) {
     var attributes = this.getAttributes().water;
-    return twgl.createBufferInfoFromArrays(gl, attributes);
+    if (attributes.position.length) {
+      return twgl.createBufferInfoFromArrays(gl, attributes);
+    }
   };
 
   var ROCK = {value: 1, fill: false};

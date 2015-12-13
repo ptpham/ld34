@@ -1,0 +1,7 @@
+{
+  "name": "Hello",
+  "height": 24,
+  "width": 24,
+  "thickness": [1, 1, 3, 2, 1],
+  "start": [7, 5]
+}
