@@ -1,0 +1,163 @@
+
+<meta content="charset=utf-8" http-equiv="Content-Type"/>
+
+<html>
+<head>
+  <script src="underscore-min.js"></script>
+  <script src="twgl-full.min.js"></script>
+  <script src="collisions.js"></script>
+  <script src="terrain.js"></script>
+  <script src="ball.js"></script>
+</head>
+<body>
+
+<script id="default-vs" type="x-shader/v-shader">
+  attribute vec3 position;
+  uniform mat4 u_projection;
+  uniform mat4 u_world;
+  uniform mat4 u_view;
+  varying float v_height;
+
+  void main() {
+    v_height = position[1] / 5.0;
+    gl_Position = u_projection*u_view*u_world*vec4(position, 1.0);
+  }
+</script>
+
+<script id="default-fs" type="x-shader/f-shader">
+  precision mediump float;
+  varying float v_height;
+  uniform vec4 u_color;
+
+  void main() {
+    gl_FragColor = u_color;
+  }
+</script>
+
+<style>
+  body { margin: 0px }
+  canvas { width: 100%; height: 100%; }
+  #watermeter { position: absolute; top: 0px; }
+</style>
+  <progress id="watermeter" value="100"></progress>
+  <canvas id="canvas"></canvas>
+</body>
+<script>
+  var v3 = twgl.v3, m4 = twgl.m4;
+  var gl = twgl.getWebGLContext(canvas);
+  var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
+  var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
+
+  var size = 3;
+  var thickness = [3, 3, 2];
+  var layers = [
+    [
+      1, 1, 1,
+      1, 1, 1,
+      1, 1, 1,
+    ],
+    [
+      1, 1, 0,
+      1, 1, 0,
+      0, 0, 0
+    ],
+    [
+      0, 0, 0,
+      0, 1, 1,
+      0, 1, 1
+    ]
+  ];
+
+  var terrain = new Terrain(size, layers, thickness);
+  var terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
+
+  var platform0 = terrain.platforms[0];
+  var lookups = _.map(terrain.platforms, function(p) {
+    return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
+  });
+
+  var GRAVITY = v3.create(0, -0.01, 0);
+  
+  var mouseX = 0, mouseY = 0;
+  canvas.onmousemove = function(e) {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  };
+
+  var keys = { };
+  document.onkeydown = function(e) { keys[e.keyCode] = true; };
+  document.onkeyup = function(e) { delete keys[e.keyCode]; };
+
+  function screenToWorld(x, y, invproj, invview, z) {
+    var width = canvas.width, height = canvas.height;
+    var dx = 2*mouseX/width - 1;
+    var dy = 1 - 2*mouseY/height;
+    z = z || 0;
+    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
+  }
+
+  var ball = new Ball(v3.create(0.5, 10, 0.5), 1.0);
+
+  function render() {
+    twgl.resizeCanvasToDisplaySize(gl.canvas);
+    var width = gl.canvas.width, height = gl.canvas.height;
+    var aspect = width/height, frustum = 10;
+    gl.viewport(0, 0, width, height);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+   
+    var target = v3.create(0, 0, 0);
+    var eye = v3.create(10, 10, 10);
+    var up = v3.create(0, 1, 0);
+
+    var position = v3.create(0,3,0);
+
+    var invview = m4.lookAt(eye, target, up);
+    var view = m4.inverse(invview);
+    var world = m4.create();
+    var projection = m4.ortho(-aspect*frustum, aspect*frustum, -frustum, frustum, 1, 100);
+    var invproj = m4.inverse(projection);
+
+    var screenNear = screenToWorld(mouseX, mouseY, invproj, invview, 0);
+    var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
+    var direction = v3.normalize(v3.subtract(screenFar, screenNear));
+
+    if (!ball.contact) {
+      v3.add(ball.velocity, GRAVITY, ball.velocity);
+      if (ball.position[1] < ball.radius) {
+        ball.hitPlane(target, up);
+        ball.contactPlane(target, up);
+      }
+    }
+
+    ball.control(keys);
+    checkLookupXZContact(lookups, ball);
+    ball.update();
+    ball.getWorld(world);
+
+    var collide = collideLine(ball.position, 1.0, screenNear, direction);
+    var alpha = collide ? 1.0 : 0.5;
+
+    var uniforms = {
+      u_projection: projection, u_world: world, u_view: view, u_color: [0.0, 1.0, 0.5, alpha]
+    };
+
+    gl.useProgram(defaultProgramInfo.program);
+    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
+    twgl.setUniforms(defaultProgramInfo, uniforms);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+
+    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, terrainBufferInfo);
+    uniforms.u_color = [0.6, 0.6, 0.0, 1.0];
+    uniforms.u_world = m4.create();
+    twgl.setUniforms(defaultProgramInfo, uniforms);
+    twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
+
+    requestAnimationFrame(render);
+  }
+
+  render();
+</script>
+</html>
+

@@ -80,7 +80,8 @@ Ball.prototype.attachPlane = function(x, normal) {
 };
 
 Ball.prototype.removeAngular = function(normal) {
-  v3.mulScalar(normal, v3.dot(ball.angular, normal), ball.angular);
+  var dot = Math.max(v3.dot(ball.angular, normal), 0.0001);
+  v3.mulScalar(normal, dot, ball.angular);
 };
 
 // Subtract velocity orthgonal to plane
