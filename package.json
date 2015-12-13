@@ -4,7 +4,7 @@
   "description": "",
   "main": "ball.js",
   "scripts": {
-    "start": "node generateLevelFiles.js"
+    "start": "node generateLevels.js"
   },
   "repository": {
     "type": "git",
