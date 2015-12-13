@@ -32,13 +32,6 @@
     get: function() { return this.getEyeFor(this.target); }
   });
 
-  Level.prototype.getEyeFor = function(target) {
-    this._eye[0] = this.width * 8 + target[0];
-    this._eye[2] = this.width * 8 + target[2];
-    this._eye[1] = this.width * 8 + target[1];
-    return this._eye;
-  };
-
   Level.prototype.reset = function () {
     this.activeBall = 0;
     while (this.balls.length > 1) { this.balls.pop(); };
@@ -49,6 +42,21 @@
     start[2] = this.start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
 
     this.ball.reset(start, 1.0);
+  };
+
+  Level.prototype.addBall = function (position, radius) {
+    this.balls.push(new Ball(position, radius));
+  };
+
+  Level.prototype.activateBall = function (index) {
+    this.activeBall = index;
+  };
+
+  Level.prototype.getEyeFor = function(target) {
+    this._eye[0] = this.width * 8 + target[0];
+    this._eye[2] = this.width * 8 + target[2];
+    this._eye[1] = this.width * 8 + target[1];
+    return this._eye;
   };
 
   root.Level = Level;
