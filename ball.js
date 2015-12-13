@@ -40,7 +40,7 @@ Ball.prototype.update = function() {
 
   var theta = v3.length(angular);
   var delta = m4.axisRotation(angular, theta);
-  m4.multiply(delta, rotation, rotation);
+  m4.multiply(rotation, delta, rotation);
 
   // Move the ball forward and dampen angular and velocity
   // when in contact with the ground.

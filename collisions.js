@@ -160,8 +160,8 @@ function checkLookupXZContact(lookups, ball) {
     var lookup = lookups[lookups.length - i - 1];
     var bottom = lookup.bottom;
     var top = bottom + lookup.thickness;
-    if (bottom > upper) return;
-    if (top < lower) return;
+    if (bottom > upper) continue;
+    if (top < lower) continue;
 
     var target = v3.create(0, top, 0);
     var contact = lookup.collide(position, radius, top);
