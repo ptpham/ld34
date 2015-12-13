@@ -28,14 +28,15 @@
     get: function() { return this.ball.position; }
   });
 
+  Level.prototype.getEyeFor = function(target) {
+    this._eye[0] = this.width * 8 + target[0];
+    this._eye[2] = this.width * 8 + target[2];
+    this._eye[1] = this.width * 8 + target[1];
+    return this._eye;
+  };
+
   Object.defineProperty(Level.prototype, 'eye', {
-    get: function() {
-      var target = this.target;
-      this._eye[0] = this.width * 8 + target[0];
-      this._eye[2] = this.width * 8 + target[2];
-      this._eye[1] = this.width * 8 + target[1];
-      return this._eye;
-    }
+    get: function() { return this.getEyeFor(this.target); }
   });
 
   root.Level = Level;

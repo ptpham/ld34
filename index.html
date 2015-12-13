@@ -32,7 +32,7 @@
   uniform vec4 u_color;
 
   void main() {
-    gl_FragColor = u_color *v_height;
+    gl_FragColor = u_color;
   }
 </script>
 
@@ -64,6 +64,7 @@
 
   var GRAVITY = v3.create(0, -0.01, 0);
   
+  // Capturing DOM events because we need render context to actually handle
   var mouseX = 0, mouseY = 0;
   canvas.onmousemove = function(e) {
     mouseX = e.clientX;
@@ -74,6 +75,10 @@
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
   document.onkeyup = function(e) { delete keys[e.keyCode]; };
 
+  var mouseDown = false, mouseEvent = false;
+  document.onmousedown = function(e) { mouseEvent = true; mouseDown = true; };
+  document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
+
   function screenToWorld(x, y, invproj, invview, z) {
     var width = canvas.width, height = canvas.height;
     var dx = 2*mouseX/width - 1;
@@ -82,7 +87,8 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
-  var ball = level.ball;
+  var balls = [level.ball, new Ball(v3.create(50.5, 10, 50.5), 1.0)];
+  var activeBall = balls[0];
 
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -93,8 +99,8 @@
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
    
-    var target = level.target;
-    var eye = level.eye;
+    var target = activeBall.position;
+    var eye = level.getEyeFor(target);
     var up = v3.create(0, 1, 0);
 
     var invview = m4.lookAt(eye, target, up);
@@ -107,30 +113,43 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
-    if (!ball.contact) {
-      v3.add(ball.velocity, GRAVITY, ball.velocity);
-      if (ball.position[1] < ball.radius) {
-        ball.hitPlane(target, up);
-        ball.contactPlane(target, up);
+    var hoverBall = null;
+    _.each(balls, function(ball) {
+      // Accelerate with gravity
+      if (!ball.contact) {
+        v3.add(ball.velocity, GRAVITY, ball.velocity);
       }
-    }
 
-    ball.control(keys);
-    checkLookupXZContact(lookups, ball);
-    ball.update();
-    ball.getWorld(world);
+      // Control the active ball with keys
+      if (ball == activeBall) ball.control(keys);
 
-    var collide = collideLine(ball.position, 1.0, screenNear, direction);
-    var alpha = collide ? 1.0 : 0.5;
+      // Check what the mouse is hovering over
+      var collide = collideLine(ball.position, 1.0, screenNear, direction);
+      if (collide) {
+        hoverBall = ball;
+        if (mouseEvent && mouseDown) {
+          activeBall = ball;
+        }
+      }
 
-    var uniforms = {
-      u_projection: projection, u_world: world, u_view: view, u_color: [0.0, 1.0, 0.5, alpha]
-    };
+      // Update physics
+      ball.update();
+      checkLookupXZContact(lookups, ball);
+    });
 
+    // Render all balls
+    var uniforms = { u_projection: projection, u_view: view };
     gl.useProgram(defaultProgramInfo.program);
     twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
-    twgl.setUniforms(defaultProgramInfo, uniforms);
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+    _.each(balls, function(ball) {
+      ball.getWorld(world);
+      var alpha = (ball == hoverBall) ? 1.0 : 0.5;
+      
+      uniforms.u_world = world;
+      uniforms.u_color = [0.0, 1.0, 0.5, alpha];
+      twgl.setUniforms(defaultProgramInfo, uniforms);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+    });
 
     twgl.setBuffersAndAttributes(gl, defaultProgramInfo, terrainBufferInfo);
     uniforms.u_color = [0.6, 0.6, 0.0, 1.0];
@@ -139,6 +158,7 @@
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
     requestAnimationFrame(render);
+    mouseEvent = false;
   }
 
   render();
