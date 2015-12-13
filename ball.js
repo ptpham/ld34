@@ -9,10 +9,7 @@ function Ball(position, radius) {
   this.angular = v3.create(0.0001);
   this.velocity = v3.create();
   this.rotation = m4.create();
-  this.position = position;
-  this.radius = radius;
-  this.friction = 0.99;
-  this.bounce = 0.3;
+  this.reset(position, radius);
 }
 
 Object.defineProperty(Ball.prototype, 'forward', {
@@ -30,6 +27,17 @@ Object.defineProperty(Ball.prototype, 'volume', {
 Ball.prototype.pushAngular = function(direction, force) {
   var acceleration = force / this.volume;
   v3.add(this.angular, v3.mulScalar(direction, acceleration), this.angular);
+};
+
+Ball.prototype.reset = function (position, radius) {
+  this.angular[0] = 0.0001;
+  this.angular[1] = this.angular[2] = 0;
+  v3.mulScalar(this.velocity, 0, this.velocity);
+  m4.identity(this.rotation);
+  this.position = position;
+  this.radius = radius;
+  this.friction = 0.99;
+  this.bounce = 0.3;
 };
 
 Ball.prototype.update = function() {
@@ -143,4 +151,3 @@ Ball.prototype.control = function(keys) {
   m4.multiply(this.rotation, yawRotation, this.rotation);
   this.pushAngular(v3.normalize(angular), force);
 };
-

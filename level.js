@@ -13,19 +13,23 @@
 
     this.frustum = this.width * 2.5;
 
-    var start = v3.create();
-    start[0] = this.start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
-    start[1] = 10;
-    start[2] = this.start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
-
-    this.ball = new Ball(start, 1.0);
-
+    this.balls = [new Ball(v3.create(), 1.0)];
+    this.activeBall = 0;
     this._eye = v3.create();
+    this.reset();
     return this;
   }
 
+  Object.defineProperty(Level.prototype, 'ball', {
+    get: function() { return this.balls[this.activeBall]; }
+  });
+
   Object.defineProperty(Level.prototype, 'target', {
     get: function() { return this.ball.position; }
+  });
+
+  Object.defineProperty(Level.prototype, 'eye', {
+    get: function() { return this.getEyeFor(this.target); }
   });
 
   Level.prototype.getEyeFor = function(target) {
@@ -35,9 +39,17 @@
     return this._eye;
   };
 
-  Object.defineProperty(Level.prototype, 'eye', {
-    get: function() { return this.getEyeFor(this.target); }
-  });
+  Level.prototype.reset = function () {
+    this.activeBall = 0;
+    while (this.balls.length > 1) { this.balls.pop(); };
+
+    var start = this.ball.position;
+    start[0] = this.start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
+    start[1] = 10;
+    start[2] = this.start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
+
+    this.ball.reset(start, 1.0);
+  };
 
   root.Level = Level;
 

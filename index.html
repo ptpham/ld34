@@ -87,8 +87,9 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
-  var balls = [level.ball, new Ball(v3.create(50.5, 10, 50.5), 1.0)];
-  var activeBall = balls[0];
+  var balls = level.balls;
+  balls.push(new Ball(v3.create(50.5, 10, 50.5), 1.0));
+  var activeBall = level.balls[0];
 
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
