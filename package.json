@@ -1,0 +1,22 @@
+{
+  "name": "ld34",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ball.js",
+  "scripts": {
+    "start": "node generateLevelFiles.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptpham/ld34.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ptpham/ld34/issues"
+  },
+  "homepage": "https://github.com/ptpham/ld34#readme",
+  "dependencies": {
+    "node-pngjs": "0.0.3"
+  }
+}
