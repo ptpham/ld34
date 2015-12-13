@@ -3,6 +3,8 @@ var v3 = twgl.v3, m4 = twgl.m4;
 var rotateN90Y = m4.rotationY(-Math.PI/2);
 var rotate90Y = m4.rotationY(Math.PI/2);
 
+var tempV3 = v3.create();
+
 function Ball(position, radius) {
   this.angular = v3.create(0.0001);
   this.velocity = v3.create();
@@ -38,7 +40,7 @@ Ball.prototype.update = function() {
 
   var theta = v3.length(angular);
   var delta = m4.axisRotation(angular, theta);
-  m4.multiply(delta, rotation, rotation);
+  m4.multiply(rotation, delta, rotation);
 
   // Move the ball forward and dampen angular and velocity
   // when in contact with the ground.
@@ -64,20 +66,19 @@ Ball.prototype.getWorld = function(world) {
 Ball.prototype.attachPlane = function(x, normal) {
   var position = this.position
   var t = intersectPlaneT(position, this.radius, x, normal);
-  console.log(this.position, normal, t);
   if (t < -this.radius) return;
 
   var shift = v3.mulScalar(normal, t + this.radius);
   v3.add(position, shift, position);
 };
 
-// Reflect velocity orthgonal to plane
+// Subtract velocity orthgonal to plane
 Ball.prototype.hitPlane = function(x, normal) {
-  this.attachPlane(x, normal); 
+  this.attachPlane(x, normal);
   var velocity = this.velocity;
   var reflex = (1 + this.bounce);
-  var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));
-  v3.subtract(velocity, remove, velocity);
+  v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity), tempV3);
+  v3.subtract(velocity, tempV3, velocity);
 };
 
 Ball.prototype.decontact = function(force, ratio) {

@@ -19,7 +19,7 @@
   varying float v_height;
 
   void main() {
-    v_height = position[1]/3.0;
+    v_height = position[1] / 10.0;
     gl_Position = u_projection*u_view*u_world*vec4(position, 1.0);
   }
 </script>
@@ -30,7 +30,7 @@
   uniform vec4 u_color;
 
   void main() {
-    gl_FragColor = u_color * v_height;
+    gl_FragColor = u_color *v_height;
   }
 </script>
 
@@ -48,12 +48,23 @@
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
 
-  var size = 2;
-  var thickness = [3];
+  var size = 3;
+  var thickness = [3, 3, 1.5];
   var layers = [
     [
-      1, 1,
-      1, 1,
+      1, 1, 1,
+      1, 1, 1,
+      1, 1, 1,
+    ],
+    [
+      1, 1, 0,
+      1, 1, 0,
+      0, 0, 0
+    ],
+    [
+      0, 0, 0,
+      0, 1, 1,
+      0, 1, 1
     ]
   ];
 
@@ -119,9 +130,9 @@
         ball.contactPlane(target, up);
       }
     }
-    checkLookupXZContact(lookups, ball);
 
     ball.control(keys);
+    checkLookupXZContact(lookups, ball);
     ball.update();
     ball.getWorld(world);
 
