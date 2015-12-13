@@ -2,5 +2,6 @@
   "name": "Hello",
   "height": 24,
   "width": 24,
-  "thickness": [2, 2, 1, 1]
+  "thickness": [1, 2, 5, 1],
+  "start": [7, 5]
 }

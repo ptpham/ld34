@@ -13,13 +13,16 @@
 
   root.Terrain = Terrain;
 
+  Terrain.HEIGHT = 1;
+  Terrain.BLOCK_WIDTH = 5;
+
   Terrain.prototype.getPlatform = function (layer) {
     return this.platforms[layer];
   };
 
   Terrain.prototype.getAttributes = function () {
-    var HEIGHT = 1;
-    var BLOCK_WIDTH = 5;
+    var HEIGHT = Terrain.HEIGHT;
+    var BLOCK_WIDTH = Terrain.BLOCK_WIDTH;
     var thicknesses = this.thicknesses;
     var size = this.size;
 
