@@ -48,12 +48,18 @@
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
 
-  var size = 2;
-  var thickness = [3];
+  var size = 3;
+  var thickness = [3, 0.5];
   var layers = [
     [
-      1, 1,
-      1, 1,
+      1, 1, 1,
+      1, 1, 1,
+      1, 1, 1,
+    ],
+    [
+      1, 1, 0,
+      1, 1, 0,
+      0, 0, 0
     ]
   ];
 
