@@ -1,6 +1,5 @@
 (function (root) {
   function Level (attributes) {
-    this.complete = false;
     this.name = attributes.name;
     this.width = attributes.width;
     this.height = attributes.height;
@@ -39,6 +38,7 @@
 
     this.setStartPosition(this.start, this.ball.position);
     this.ball.reset(this.ball.position, 1.0);
+    this.complete = false;
   };
 
   Level.prototype.addBall = function (start, radius) {

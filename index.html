@@ -80,18 +80,15 @@
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
 
-  function screenToWorld(x, y, invproj, invview, z) {
-    var width = canvas.width, height = canvas.height;
-    var dx = 2*mouseX/width - 1;
-    var dy = 1 - 2*mouseY/height;
-    z = z || 0;
-    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
-  }
-
   var balls = level.balls;
   level.addBall([10, 10], 1.0);
 
   function render() {
+    if (level.complete) {
+      console.log('Level Complete!');
+      return;
+    }
+
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     var width = gl.canvas.width, height = gl.canvas.height;
     var aspect = width/height, frustum = level.width * 2.5;
@@ -141,6 +138,8 @@
       checkLookupXZContact(lookups, ball);
     });
 
+    level.update();
+
     // Render all balls
     var uniforms = { u_projection: projection, u_view: view };
     gl.useProgram(defaultProgramInfo.program);
@@ -172,6 +171,14 @@
     requestAnimationFrame(render);
     mouseEvent = false;
     dblClick = false;
+  }
+
+  function screenToWorld(x, y, invproj, invview, z) {
+    var width = canvas.width, height = canvas.height;
+    var dx = 2*mouseX/width - 1;
+    var dy = 1 - 2*mouseY/height;
+    z = z || 0;
+    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
   render();
