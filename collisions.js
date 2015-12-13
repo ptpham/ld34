@@ -178,7 +178,6 @@ function checkLookupXZContact(lookups, ball) {
 
           var volume = ball.volume;
           v3.add(ball.angular, v3.mulScalar(ball.angular, yvel, tempV3), ball.angular);
-          v3.add(ball.velocity, v3.mulScalar(ball.velocity, -yvel, tempV3), ball.velocity);
         }
         handled = true;
       }
@@ -208,5 +207,42 @@ function checkLookupXZContact(lookups, ball) {
   }
 
   if (!handled) ball.decontact(v3.create(), 0.1);
+}
+
+function checkInterballCollisions(balls) {
+  var diff = v3.create(), temp = v3.create();
+  for (var i = 0; i < balls.length; i++) {
+    var first = balls[i];
+    var r1 = first.radius;
+    for (var j = 0; j < i; j++) {
+      var second = balls[j];
+      var r2 = second.radius;
+      v3.subtract(first.position, second.position, diff);
+      var distance = v3.length(diff);
+      if (distance < r1 + r2) {
+        var speed1 = Math.max(v3.length(first.velocity), 0.01);
+        var speed2 = Math.max(v3.length(second.velocity), 0.01);
+        v3.normalize(diff, diff);
+
+        v3.mulScalar(diff, speed1, first.velocity);
+        v3.mulScalar(diff, -speed2, second.velocity);
+        
+        var angular1 = first.angular, angular2 = second.angular;
+        var sign1 = (v3.dot(angular1, diff) > 0) ? 1 : -1;
+        var sign2 = (v3.dot(angular2, diff) > 0) ? 1 : -1;
+        
+        var ma1 = Math.max(v3.length(angular1), 0.001);
+        var ma2 = Math.max(v3.length(angular2), 0.001);
+
+        v3.add(angular1, diff, angular1);
+        v3.add(angular2, -diff, angular2);
+        v3.normalize(angular1, angular1);
+        v3.normalize(angular2, angular2);
+         
+        v3.mulScalar(angular1, ma1, angular1);
+        v3.mulScalar(angular2, ma2, angular2);
+      }
+    }
+  }
 }
 

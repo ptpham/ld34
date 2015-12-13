@@ -114,6 +114,7 @@
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
     var hoverBall = null;
+    checkInterballCollisions(balls);
     _.each(balls, function(ball, i) {
       // Accelerate with gravity
       if (!ball.contact) {
@@ -124,7 +125,7 @@
       if (ball == level.ball) ball.control(keys);
 
       // Check what the mouse is hovering over
-      var collide = collideLine(ball.position, 1.0, screenNear, direction);
+      var collide = collideLine(ball.position, ball.radius, screenNear, direction);
       if (collide) {
         hoverBall = ball;
         if (mouseEvent && mouseDown) {
