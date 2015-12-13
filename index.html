@@ -76,7 +76,7 @@
 
   var levelIndex = 1;
   var level, balls, terrain;
-  var terrainLookups, waterLookups, terrainBufferInfo, waterBufferInfo;
+  var terrainLookups, waterLookups, terrainBufferInfo, waterBufferInfos;
   var completeTriggered;
 
   startLevel(levelIndex);
@@ -210,10 +210,13 @@
     twgl.setUniforms(defaultProgramInfo, uniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
-    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, waterBufferInfo);
     uniforms.u_color = [0.0, 0.2, 0.6, 1.0];
     twgl.setUniforms(defaultProgramInfo, uniforms);
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
+    _.each(waterBufferInfos, function (waterBufferInfo) {
+      if (!waterBufferInfo) return;
+      twgl.setBuffersAndAttributes(gl, defaultProgramInfo, waterBufferInfo);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
+    });
 
     requestAnimationFrame(render);
     mouseEvent = false;
@@ -248,7 +251,7 @@
     level.reset();
     terrain = level.terrain;
     terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
-    waterBufferInfo = terrain.createWaterBufferInfo(gl);
+    waterBufferInfos = terrain.createWaterBufferInfos(gl);
 
     terrainLookups = _.map(terrain.platforms, function(p) {
       return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
