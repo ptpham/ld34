@@ -3,19 +3,22 @@ var fs = require('fs'),
     PNG = require('node-pngjs').PNG;
 
 var levelDir = './levels';
+var levels = [];
+
 var directories = fs.readdirSync(levelDir);
 directories = _.reject(directories, function (dir) {
   return (dir === '.DS_Store');
 });
-_.each(directories, function (dir) {
+var numLevels = directories.length;
+
+_.each(directories, function (dir, index) {
   var path = [levelDir, dir].join('/');
   fs.readdir(path, function (e, files) {
-    extractLevel(dir, path, files);
+    extractLevel(dir, path, files, index);
   });
 });
 
-function extractLevel (name, path, files) {
-  console.log(path, files);
+function extractLevel (name, path, files, index) {
   var level = {};
 
   var image = false;
@@ -36,20 +39,20 @@ function extractLevel (name, path, files) {
   });
 
   function doContinue () {
+    level.name = config.name;
     level.width = config.width;
     level.height = config.height;
-    parseLevel(name, image, config, level);
+    parseLevel(image, config, level, index);
   }
 }
 
-function parseLevel(name, file, config, level) {
+function parseLevel(file, config, level, index) {
   fs.createReadStream(file)
     .pipe(new PNG({filterType: 4}))
     .on('parsed', function() {
       var layers = level.layers = [];
       for (var y = 0; y < this.height; y++) {
         var layerIndex = Math.floor(y / config.height);
-        console.log(layerIndex);
         if (!layers[layerIndex]) {
           layers[layerIndex] = [];
         }
@@ -63,13 +66,13 @@ function parseLevel(name, file, config, level) {
             continue;
           }
 
-          // Black
+          // Black - Rock
           if (this.data[idx] + this.data[idx + 1] + this.data[idx + 2] === 0) {
             layer.push(1);
             continue;
           }
 
-          // Blue
+          // Blue - Water
           if (this.data[idx + 2] === 255) {
             layer.push(2);
             continue;
@@ -77,7 +80,17 @@ function parseLevel(name, file, config, level) {
         }
       }
 
-      var data = 'var level_' + name + ' = ' + JSON.stringify(level) + ';'; 
-      fs.writeFile(levelDir + '/' + name + '.js', data);
+      levelReady(index, level);
     });
+}
+
+var finishedLevels = 0;
+function levelReady(index, level) {
+  finishedLevels++;
+  levels[index] = level;
+
+  if (finishedLevels === numLevels - 1) {
+    var data = 'var levels = ' + JSON.stringify(levels) + ';'; 
+    fs.writeFile(levelDir + '/levels.js', data);
+  }
 }
