@@ -5,6 +5,14 @@ var rotate90Y = m4.rotationY(Math.PI/2);
 
 var tempV3 = v3.create();
 
+function randomV3(v) {
+  v = v || v3.create();
+  v[0] = Math.random() - 0.5;
+  v[1] = Math.random() - 0.5;
+  v[2] = Math.random() - 0.5;
+  return v;
+}
+
 function Ball(position, radius) {
   this.angular = v3.create(0.0001);
   this.velocity = v3.create();
@@ -23,6 +31,16 @@ Object.defineProperty(Ball.prototype, 'forward', {
 Object.defineProperty(Ball.prototype, 'volume', { 
   get: function() { return Math.pow(this.radius, 3); }
 });
+
+Ball.prototype.split = function() {
+  var position = randomV3();
+  v3.mulScalar(position, 0.3, position);
+  v3.add(position, this.position, position);
+  var radius = Math.pow(this.volume/2, 1/3);
+  var result = new Ball(position, radius);
+  this.radius = radius;
+  return result;
+};
 
 Ball.prototype.pushAngular = function(direction, force) {
   var acceleration = force / this.volume;
@@ -147,9 +165,8 @@ Ball.prototype.control = function(keys) {
   
   var angular = this.angular;
   if (v3.lengthSq(angular) < 0.000001) {
-    angular[0] = Math.random();
-    angular[1] = Math.random();
-    angular[2] = Math.random();
+    randomV3(angular);
+    angular[1] = 0;
     v3.normalize(angular, angular);
     v3.mulScalar(angular, 0.001, angular);
   }
