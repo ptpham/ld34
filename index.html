@@ -159,7 +159,7 @@
           var absorption = Math.min(0.5*waterRemain, 0.01);
           if (waterRemain < 0.001) absorption = waterRemain;
           lookup.waterRemain -= absorption;
-          ///ball.grow(absorption);
+          ball.grow(absorption);
         }
       });
 
