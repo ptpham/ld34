@@ -178,7 +178,6 @@ function checkLookupXZContact(lookups, ball) {
 
           var volume = ball.volume;
           v3.add(ball.angular, v3.mulScalar(ball.angular, yvel, tempV3), ball.angular);
-          v3.add(ball.velocity, v3.mulScalar(ball.velocity, -yvel, tempV3), ball.velocity);
         }
         handled = true;
       }
