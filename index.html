@@ -118,9 +118,8 @@
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
       }
-
-      checkLookupXZContact(lookups, ball);
     }
+    checkLookupXZContact(lookups, ball);
 
     ball.control(keys);
     ball.update();
