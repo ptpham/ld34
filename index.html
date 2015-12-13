@@ -87,7 +87,7 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
-  var balls = [level.ball, new Ball(v3.create(50.5, 10, 50.5), 1.0)];
+  var balls = [level.ball, new Ball(v3.add(level.ball.position, [0, 1, 0]), 1.0)];
   var activeBall = balls[0];
 
   function render() {
@@ -114,6 +114,7 @@
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
     var hoverBall = null;
+    checkInterballCollisions(balls);
     _.each(balls, function(ball) {
       // Accelerate with gravity
       if (!ball.contact) {

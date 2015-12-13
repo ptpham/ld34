@@ -138,6 +138,14 @@ Ball.prototype.control = function(keys) {
   if (keys[68]) yaw -= 0.1;
   
   var angular = this.angular;
+  if (v3.lengthSq(angular) < 0.000001) {
+    angular[0] = Math.random();
+    angular[1] = Math.random();
+    angular[2] = Math.random();
+    v3.normalize(angular, angular);
+    v3.mulScalar(angular, 0.001, angular);
+  }
+
   var yawRotation = m4.rotationY(yaw);
   m4.transformPoint(yawRotation, angular, angular);
   m4.multiply(this.rotation, yawRotation, this.rotation);
