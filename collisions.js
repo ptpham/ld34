@@ -219,12 +219,22 @@ function checkInterballCollisions(balls) {
       v3.subtract(first.position, second.position, diff);
       var distance = v3.length(diff);
       if (distance < r1 + r2) {
+        var vol1 = first.volume, vol2 = second.volume;
+        var ratio = vol1 / (vol1 + vol2);
+
+        var pos1 = first.position;
+        var pos2 = second.position;
+
         var speed1 = Math.max(v3.length(first.velocity), 0.01);
         var speed2 = Math.max(v3.length(second.velocity), 0.01);
         v3.normalize(diff, diff);
 
         v3.mulScalar(diff, speed1, first.velocity);
         v3.mulScalar(diff, -speed2, second.velocity);
+
+        var remain = r1 + r2 - distance;
+        v3.add(pos1, v3.mulScalar(diff, 0.5*ratio*remain), pos1);
+        v3.add(pos2, v3.mulScalar(diff, -0.5*(1 - ratio)*remain), pos2);
 
         var angular1 = first.angular, angular2 = second.angular;
         var sign1 = (v3.dot(angular1, diff) > 0) ? 1 : -1;
