@@ -11,7 +11,7 @@
       attributes.thickness
     );
 
-    this.frustum = this.width * 2.5;
+    this.goals = _.map(attributes.goals, this.setGoal.bind(this));
 
     this.balls = [new Ball(v3.create(), 1.0)];
     this.activeBall = 0;
@@ -61,10 +61,18 @@
     position[0] = start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
     position[1] = 10;
     position[2] = start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
+    return position;
   };
 
-  Level.prototype.update = function () {
-    // TODO
+  Level.prototype.setGoal = function (goal) {
+    var radius = goal.radius;
+    var platform = this.terrain.platforms[goal.layer];
+    var position = this.setStartPosition(goal.position, v3.create());
+    position[1] = platform.bottom + platform.thickness;
+    return {
+      position: position,
+      radius: radius
+    };
   };
 
   root.Level = Level;

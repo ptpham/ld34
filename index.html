@@ -93,7 +93,7 @@
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     var width = gl.canvas.width, height = gl.canvas.height;
-    var aspect = width/height, frustum = level.frustum;
+    var aspect = width/height, frustum = level.width * 2.5;
     gl.viewport(0, 0, width, height);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
