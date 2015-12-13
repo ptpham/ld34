@@ -148,7 +148,7 @@ function checkLookupXZContact(lookups, ball) {
   var upper = position[1] + ball.radius;
   var up = v3.create(0, 1, 0);
   var radius = ball.radius;
-  
+
   var handled = false;
   for (var i = 0; i < lookups.length; i++) {
     var lookup = lookups[lookups.length - i - 1];
@@ -198,7 +198,7 @@ function checkLookupXZContact(lookups, ball) {
           var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
           v3.subtract(velocity, remove, velocity);
         } else {
-          ball.hitPlane(contact[0], contact[1]); 
+          ball.hitPlane(contact[0], contact[1]);
         }
         ball.removeAngular(contact[1]);
         handled = true;
@@ -226,11 +226,11 @@ function checkInterballCollisions(balls) {
 
         v3.mulScalar(diff, speed1, first.velocity);
         v3.mulScalar(diff, -speed2, second.velocity);
-        
+
         var angular1 = first.angular, angular2 = second.angular;
         var sign1 = (v3.dot(angular1, diff) > 0) ? 1 : -1;
         var sign2 = (v3.dot(angular2, diff) > 0) ? 1 : -1;
-        
+
         var ma1 = Math.max(v3.length(angular1), 0.001);
         var ma2 = Math.max(v3.length(angular2), 0.001);
 
@@ -238,7 +238,7 @@ function checkInterballCollisions(balls) {
         v3.add(angular2, -diff, angular2);
         v3.normalize(angular1, angular1);
         v3.normalize(angular2, angular2);
-         
+
         v3.mulScalar(angular1, ma1, angular1);
         v3.mulScalar(angular2, ma2, angular2);
       }
@@ -246,3 +246,26 @@ function checkInterballCollisions(balls) {
   }
 }
 
+function checkGoalCollisions (goals, balls) {
+  var scored = _.map(goals, function (goal) {
+    var nearestBall = null;
+    var nearestDistance = Infinity;
+    var diff = v3.create();
+
+    for (var i = 0; i < balls.length; i++) {
+      var ball = balls[i];
+      v3.subtract(goal.position, ball.position, diff);
+      var distance = v3.length(diff);
+
+      if (distance < goal.radius + ball.radius / 2 && distance < nearestDistance) {
+        nearestBall = ball;
+        nearestDistance = distance;
+      }
+    }
+
+    // TODO: gently nudge to center
+
+    return nearestBall;
+  });
+  return scored;
+}

@@ -1,5 +1,6 @@
 (function (root) {
   function Level (attributes) {
+    this.complete = false;
     this.name = attributes.name;
     this.width = attributes.width;
     this.height = attributes.height;
@@ -79,6 +80,25 @@
     m4.identity(world);
     m4.translate(world, goal.position, world);
     m4.scale(world, [goal.radius, goal.radius, goal.radius], world);
+  };
+
+  Level.prototype.update = function () {
+    var goals = this.goals;
+    var scored = checkGoalCollisions(goals, this.balls);
+    var completed = 0;
+    _.each(scored, function (ball, index) {
+      if (!ball) return;
+      var goal = goals[index];
+
+      var diff = Math.abs(goal.radius - ball.radius);
+      if (diff < 0.2) {
+        completed++;
+      }
+    });
+
+    if (completed === this.goals.length) {
+      this.complete = true;
+    }
   };
 
   root.Level = Level;
