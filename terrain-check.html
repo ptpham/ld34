@@ -173,10 +173,12 @@
     twgl.setUniforms(defaultProgramInfo, uniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
-    gl.useProgram(waterProgramInfo.program);
-    twgl.setBuffersAndAttributes(gl, waterProgramInfo, waterBufferInfo);
-    twgl.setUniforms(waterProgramInfo, uniforms);
-    twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
+    if (waterBufferInfo) {
+      gl.useProgram(waterProgramInfo.program);
+      twgl.setBuffersAndAttributes(gl, waterProgramInfo, waterBufferInfo);
+      twgl.setUniforms(waterProgramInfo, uniforms);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
+    }
 
     requestAnimationFrame(render);
   }

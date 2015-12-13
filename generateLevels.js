@@ -7,7 +7,7 @@ var levels = [];
 
 var directories = fs.readdirSync(levelDir);
 directories = _.reject(directories, function (dir) {
-  return (dir === '.DS_Store');
+  return (dir === '.DS_Store' || dir === 'levels.js');
 });
 var numLevels = directories.length;
 
@@ -85,7 +85,7 @@ function levelReady(index, level) {
   finishedLevels++;
   levels[index] = level;
 
-  if (finishedLevels === numLevels - 1) {
+  if (finishedLevels === numLevels) {
     var data = 'var levels = ' + JSON.stringify(levels) + ';'; 
     fs.writeFile(levelDir + '/levels.js', data);
   }

@@ -57,12 +57,16 @@
 
   Terrain.prototype.createTerrainBufferInfo = function (gl) {
     var attributes = this.getAttributes().terrain;
-    return twgl.createBufferInfoFromArrays(gl, attributes);
+    if (attributes.position.length) {
+      return twgl.createBufferInfoFromArrays(gl, attributes);
+    }
   };
 
   Terrain.prototype.createWaterBufferInfo = function (gl) {
     var attributes = this.getAttributes().water;
-    return twgl.createBufferInfoFromArrays(gl, attributes);
+    if (attributes.position.length) {
+      return twgl.createBufferInfoFromArrays(gl, attributes);
+    }
   };
 
   var ROCK = {value: 1, fill: false};
