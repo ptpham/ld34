@@ -86,7 +86,7 @@ function levelReady(index, level) {
   levels[index] = level;
 
   if (finishedLevels === numLevels) {
-    var data = 'var levels = ' + JSON.stringify(levels) + ';'; 
+    var data = 'var levels = ' + JSON.stringify(levels) + ';';
     fs.writeFile(levelDir + '/levels.js', data);
   }
 }

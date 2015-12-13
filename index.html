@@ -40,9 +40,29 @@
   body { margin: 0px }
   canvas { width: 100%; height: 100%; }
   #watermeter { position: absolute; top: 0px; }
+  #reset-level { position: absolute; bottom: 0;}
+  .overlay {
+    width: 60%;
+    height: 60%;
+    background-color: white;
+    position: absolute;
+    top: 20%; left: 20%;
+    display: none;
+  }
+  #complete.last button {
+    display: none;
+  }
+  .visible {
+    display: block;
+  }
 </style>
   <progress id="watermeter" value="100"></progress>
   <canvas id="canvas"></canvas>
+  <div id="complete" class="overlay">
+    <strong>Level Complete!</strong>
+    <button id="next-level" type="button">Next Level</button>
+  </div>
+  <button id="reset-level" type="button">Reset</button>
 </body>
 <script>
   Level.load(levels);
@@ -52,17 +72,13 @@
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
 
-  var level = Level.get(1);
-
-  var terrain = level.terrain;
-  var terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
-
-  var platform0 = terrain.platforms[0];
-  var lookups = _.map(terrain.platforms, function(p) {
-    return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
-  });
-
   var GRAVITY = v3.create(0, -0.01, 0);
+
+  var levelIndex = 1;
+  var level, balls, terrain, platform0, lookups;
+  var completeTriggered;
+
+  startLevel(levelIndex);
   
   // Capturing DOM events because we need render context to actually handle
   var mouseX = 0, mouseY = 0;
@@ -70,6 +86,12 @@
     mouseX = e.clientX;
     mouseY = e.clientY;
   };
+
+  var reset = document.getElementById('reset-level');
+  var next = document.getElementById('next-level');
+
+  reset.onclick = function () { startLevel(levelIndex); };
+  next.onclick = function () { startLevel(levelIndex++); };
 
   var keys = { };
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
@@ -80,17 +102,11 @@
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
 
-  function screenToWorld(x, y, invproj, invview, z) {
-    var width = canvas.width, height = canvas.height;
-    var dx = 2*mouseX/width - 1;
-    var dy = 1 - 2*mouseY/height;
-    z = z || 0;
-    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
-  }
-
-  var balls = level.balls;
-
   function render() {
+    if (level.complete && !completeTriggered) {
+      completeLevel(levelIndex);
+    }
+
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     var width = gl.canvas.width, height = gl.canvas.height;
     var aspect = width/height, frustum = level.width * 2.5;
@@ -137,7 +153,7 @@
       if (collide) {
         hoverBall = ball;
         if (dblClick) {
-          balls.push(ball.split());
+          level.addBall(ball.split());
         } else if (mouseEvent && mouseDown) {
           level.activateBall(i);
         }
@@ -147,6 +163,8 @@
       ball.update();
       checkLookupXZContact(lookups, ball);
     });
+
+    level.update();
 
     // Render all balls
     var uniforms = { u_projection: projection, u_view: view };
@@ -179,6 +197,45 @@
     requestAnimationFrame(render);
     mouseEvent = false;
     dblClick = false;
+  }
+
+  function screenToWorld(x, y, invproj, invview, z) {
+    var width = canvas.width, height = canvas.height;
+    var dx = 2*mouseX/width - 1;
+    var dy = 1 - 2*mouseY/height;
+    z = z || 0;
+    return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
+  }
+
+  function completeLevel (levelIndex) {
+    var complete = document.getElementById('complete');
+    complete.classList.add('visible');
+
+    if (levelIndex === Level.list.length - 1)
+      complete.classList.add('last');
+
+    completeTriggered = true;
+    console.log('Level Complete!');
+  }
+
+  function startLevel (levelIndex) {
+    var complete = document.getElementById('complete');
+    complete.classList.remove('visible');
+    complete.classList.remove('last');
+
+    level = Level.get(levelIndex);
+    level.reset();
+    terrain = level.terrain;
+    terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
+
+    platform0 = terrain.platforms[0];
+    lookups = _.map(terrain.platforms, function(p) {
+      return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
+    });
+
+    balls = level.balls;
+
+    completeTriggered = false;
   }
 
   render();

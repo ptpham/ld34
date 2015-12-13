@@ -38,12 +38,17 @@
 
     this.setStartPosition(this.start, this.ball.position);
     this.ball.reset(this.ball.position, 1.0);
+    this.complete = false;
   };
 
   Level.prototype.addBall = function (start, radius) {
-    var position = v3.create();
-    this.setStartPosition(start, position);
-    this.balls.push(new Ball(position, radius));
+    if (start instanceof Ball) {
+      this.balls.push(start);
+    } else {
+      var position = v3.create();
+      this.setStartPosition(start, position);
+      this.balls.push(new Ball(position, radius));
+    }
   };
 
   Level.prototype.activateBall = function (index) {
@@ -79,6 +84,25 @@
     m4.identity(world);
     m4.translate(world, goal.position, world);
     m4.scale(world, [goal.radius, goal.radius, goal.radius], world);
+  };
+
+  Level.prototype.update = function () {
+    var goals = this.goals;
+    var scored = checkGoalCollisions(goals, this.balls);
+    var completed = 0;
+    _.each(scored, function (ball, index) {
+      if (!ball) return;
+      var goal = goals[index];
+
+      var diff = Math.abs(goal.radius - ball.radius);
+      if (diff < 0.2) {
+        completed++;
+      }
+    });
+
+    if (completed === this.goals.length) {
+      this.complete = true;
+    }
   };
 
   root.Level = Level;
