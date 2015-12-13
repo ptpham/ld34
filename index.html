@@ -40,9 +40,29 @@
   body { margin: 0px }
   canvas { width: 100%; height: 100%; }
   #watermeter { position: absolute; top: 0px; }
+  #reset-level { position: absolute; bottom: 0;}
+  .overlay {
+    width: 60%;
+    height: 60%;
+    background-color: white;
+    position: absolute;
+    top: 20%; left: 20%;
+    display: none;
+  }
+  #complete.last button {
+    display: none;
+  }
+  .visible {
+    display: block;
+  }
 </style>
   <progress id="watermeter" value="100"></progress>
   <canvas id="canvas"></canvas>
+  <div id="complete" class="overlay">
+    <strong>Level Complete!</strong>
+    <button id="next-level" type="button">Next Level</button>
+  </div>
+  <button id="reset-level" type="button">Reset</button>
 </body>
 <script>
   Level.load(levels);
@@ -66,6 +86,12 @@
     mouseX = e.clientX;
     mouseY = e.clientY;
   };
+
+  var reset = document.getElementById('reset-level');
+  var next = document.getElementById('next-level');
+
+  reset.onclick = function () { startLevel(levelIndex); };
+  next.onclick = function () { startLevel(levelIndex++); };
 
   var keys = { };
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
@@ -174,13 +200,23 @@
   }
 
   function completeLevel (levelIndex) {
+    var complete = document.getElementById('complete');
+    complete.classList.add('visible');
+
+    if (levelIndex === Level.list.length - 1)
+      complete.classList.add('last');
+
     completeTriggered = true;
     console.log('Level Complete!');
-    //startLevel(++levelIndex);
   }
 
   function startLevel (levelIndex) {
+    var complete = document.getElementById('complete');
+    complete.classList.remove('visible');
+    complete.classList.remove('last');
+
     level = Level.get(levelIndex);
+    level.reset();
     terrain = level.terrain;
     terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
 
