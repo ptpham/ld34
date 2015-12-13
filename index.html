@@ -58,6 +58,23 @@
 </style>
   <progress id="watermeter" value="100"></progress>
   <canvas id="canvas"></canvas>
+  <div id="instructions" class="overlay">
+    <strong>Controls:</strong>
+    <ul>
+      <li>Move your moss ball with WASD.</li>
+      <li>Double click the ball to split it in into multiple balls.</li>
+      <li>You can select moss balls by clicking them.</li>
+    </ul>
+
+    <strong>Gameplay:</strong>
+    <ul>
+      <li>Navigate the level and get to the goal!</li>
+      <li>Your moss ball needs to be about as big as the goal to proceed.</li>
+      <li>Your moss ball grows in water.</li>
+    </ul>
+
+    <button id="close-instructions" type="button">Got it!</button>
+  </div>
   <div id="complete" class="overlay">
     <strong>Level Complete!</strong>
     <button id="next-level" type="button">Next Level</button>
@@ -102,6 +119,14 @@
   document.onmousedown = function(e) { mouseEvent = true; mouseDown = true; };
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
+
+  var instructions = document.getElementById('instructions');
+  instructions.classList.add('visible');
+
+  var closeInstructions = document.getElementById('close-instructions');
+  closeInstructions.onclick = function () {
+    instructions.classList.remove('visible');
+  }
 
   function render() {
     if (level.complete && !completeTriggered) {
@@ -251,6 +276,10 @@
 
     completeTriggered = true;
     console.log('Level Complete!');
+  }
+
+  function startNextLevel () {
+    startLevel(++levelIndex);
   }
 
   function startLevel (levelIndex) {
