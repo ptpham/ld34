@@ -27,8 +27,6 @@ function extractLevel (name, path, files, index) {
   _.each(files, function (filename) {
     if (filename.substr(-5) === '.json') {
       config = require(path + '/' + filename);
-      level.width = config.width;
-      level.height = config.height;
       if (image) doContinue();
     }
 
@@ -39,9 +37,7 @@ function extractLevel (name, path, files, index) {
   });
 
   function doContinue () {
-    level.name = config.name;
-    level.width = config.width;
-    level.height = config.height;
+    _.extend(level, config);
     parseLevel(image, config, level, index);
   }
 }

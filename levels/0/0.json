@@ -1,5 +1,6 @@
 {
   "name": "Hello",
   "height": 24,
-  "width": 24
+  "width": 24,
+  "thickness": [2, 2, 1, 1]
 }

@@ -21,6 +21,7 @@
     var HEIGHT = 1;
     var BLOCK_WIDTH = 1;
     var thicknesses = this.thicknesses;
+    var size = this.size;
 
     if (!this.attributes) {
       var startHeight = 0;
@@ -29,7 +30,7 @@
         water: {position: [], normal: []}
       };
 
-      this.platforms = _.map(layers, function (layer, i) {
+      this.platforms = _.map(this.layers, function (layer, i) {
         var thickness = (thicknesses[i] || 1) * HEIGHT;
         var platform = {
           bottom: startHeight,
