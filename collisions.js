@@ -98,13 +98,6 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
       v3.subtract(point, c, diff);
       diff[1] = 0;
       if (v3.lengthSq(diff) < rSquared) {
-        /*
-        var center = this.centers[i];
-        var diff = v3.subtract(c, center);
-        diff[1] = 0;
-        v3.normalize(diff);
-        */
-
         v3.subtract(point, c, diff);
         diff[1] = 0;
 
@@ -181,11 +174,12 @@ function checkLookupXZContact(lookups, ball) {
           ball.velocity[1] = 0;
         }
       }
-    } else if (switched && Math.abs(top - lower) < 0.0001) {
-      ball.decontact(v3.create(), 0.5);
-    } else if (position[1] > bottom && position[1] < top) {
-      if (!contact || !contact.length) {
+    } else {
+      if ((position[1] > bottom && position[1] < top) && (!contact || !contact.length)) {
         contact = lookup.collide(position, ball.radius, position[1]);
+      }
+      if (!contact) {
+        contact = lookup.collide(position, ball.radius, bottom);
       }
 
       if (contact) {
@@ -196,10 +190,12 @@ function checkLookupXZContact(lookups, ball) {
           var velocity = ball.velocity;
           var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
           v3.subtract(velocity, remove, velocity);
-          v3.mulScalar(normal, v3.dot(ball.angular, normal), ball.angular);
         } else {
           ball.hitPlane(contact[0], contact[1]); 
         }
+        ball.removeAngular(contact[1]);
+      } else {
+        ball.decontact(v3.create(), 0.5);
       }
     }
   }

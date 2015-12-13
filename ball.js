@@ -56,10 +56,17 @@ Ball.prototype.update = function() {
   v3.add(position, this.velocity, position);
 };
 
+Ball.prototype.grow = function(amount) {
+  var radius = Math.pow(this.volume + amount, 1/3);
+  this.position[1] = radius - this.radius;
+  this.radius = radius;
+};
+
 Ball.prototype.getWorld = function(world) {
   m4.identity(world);
   m4.translate(world, this.position, world);
   m4.multiply(this.rotation, world, world);
+  m4.scale(world, [this.radius, this.radius, this.radius], world);
 };
 
 // Prevents the ball from intersecting the plane
@@ -70,6 +77,10 @@ Ball.prototype.attachPlane = function(x, normal) {
 
   var shift = v3.mulScalar(normal, t + this.radius);
   v3.add(position, shift, position);
+};
+
+Ball.prototype.removeAngular = function(normal) {
+  v3.mulScalar(normal, v3.dot(ball.angular, normal), ball.angular);
 };
 
 // Subtract velocity orthgonal to plane
