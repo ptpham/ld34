@@ -89,7 +89,6 @@
   }
 
   var balls = level.balls;
-  level.addBall([10, 10], 1.0);
 
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -114,6 +113,14 @@
     var screenFar = screenToWorld(mouseX, mouseY, invproj, invview, 1);
     var direction = v3.normalize(v3.subtract(screenFar, screenNear));
 
+    // Compute cardinal directions for camera motion: up, right, down, left
+    var cardinalUp = v3.subtract(target, eye);
+    cardinalUp[1] = 0;
+    var cardinals = [v3.normalize(cardinalUp, cardinalUp)];
+    for (var i = 0; i < 3; i++) {
+      cardinals.push(m4.transformPoint(rotate90Y, cardinals[i]));
+    }
+
     var hoverBall = null;
     checkInterballCollisions(balls);
     _.each(balls, function(ball, i) {
@@ -123,7 +130,7 @@
       }
 
       // Control the active ball with keys
-      if (ball == level.ball) ball.control(keys);
+      if (ball == level.ball) ball.controlFixed(keys, cardinals);
 
       // Check what the mouse is hovering over
       var collide = collideLine(ball.position, ball.radius, screenNear, direction);
