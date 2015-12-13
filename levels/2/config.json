@@ -2,7 +2,7 @@
   "name": "Bridge",
   "height": 8,
   "width": 32,
-  "thickness": [1, 0.5, 0.5, 0.5, 2, 1, 0.5],
+  "thickness": [1, 0.8, 0.8, 0.8, 2, 1, 0.5],
   "start": [4, 4],
   "goals": [
     {"position": [28, 4], "layer": 1, "radius": 2}
