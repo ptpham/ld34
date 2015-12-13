@@ -52,17 +52,13 @@
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
 
-  var level = Level.get(1);
-
-  var terrain = level.terrain;
-  var terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
-
-  var platform0 = terrain.platforms[0];
-  var lookups = _.map(terrain.platforms, function(p) {
-    return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
-  });
-
   var GRAVITY = v3.create(0, -0.01, 0);
+
+  var levelIndex = 1;
+  var level, balls, terrain, platform0, lookups;
+  var completeTriggered;
+
+  startLevel(levelIndex);
   
   // Capturing DOM events because we need render context to actually handle
   var mouseX = 0, mouseY = 0;
@@ -80,13 +76,9 @@
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
 
-  var balls = level.balls;
-  level.addBall([10, 10], 1.0);
-
   function render() {
-    if (level.complete) {
-      console.log('Level Complete!');
-      return;
+    if (level.complete && !completeTriggered) {
+      completeLevel(levelIndex);
     }
 
     twgl.resizeCanvasToDisplaySize(gl.canvas);
@@ -179,6 +171,27 @@
     var dy = 1 - 2*mouseY/height;
     z = z || 0;
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
+  }
+
+  function completeLevel (levelIndex) {
+    completeTriggered = true;
+    console.log('Level Complete!');
+    //startLevel(++levelIndex);
+  }
+
+  function startLevel (levelIndex) {
+    level = Level.get(levelIndex);
+    terrain = level.terrain;
+    terrainBufferInfo = terrain.createTerrainBufferInfo(gl);
+
+    platform0 = terrain.platforms[0];
+    lookups = _.map(terrain.platforms, function(p) {
+      return new TriangleLookupXZ(p.vertices, p.bottom, p.thickness);
+    });
+
+    balls = level.balls;
+
+    completeTriggered = false;
   }
 
   render();
