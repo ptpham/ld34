@@ -76,9 +76,12 @@
     var positions = attributes.position;
     var normals = attributes.normal;
 
+    var last = size-1;
     var sections = layer.length-size-1;
     for (var i = 0; i < sections; i++) {
-      var x = (i % size) * block;
+      var col = i % size;
+      if (col === last) continue;
+      var x = col * block;
       var y = Math.floor(i / size) * block;
       var section = [layer[i], layer[i+1], layer[size+i+1], layer[size+i]];
 
