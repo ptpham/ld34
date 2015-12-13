@@ -87,20 +87,20 @@
     return m4.transformPoint(invview, m4.transformPoint(invproj, [dx, dy, z]));
   }
 
-  var balls = [level.ball, new Ball(v3.add(level.ball.position, [0, 1, 0]), 1.0)];
-  var activeBall = balls[0];
+  var balls = level.balls;
+  level.addBall([10, 10], 1.0);
 
   function render() {
     twgl.resizeCanvasToDisplaySize(gl.canvas);
     var width = gl.canvas.width, height = gl.canvas.height;
-    var aspect = width/height, frustum = level.frustum;
+    var aspect = width/height, frustum = level.width * 2.5;
     gl.viewport(0, 0, width, height);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
    
-    var target = activeBall.position;
-    var eye = level.getEyeFor(target);
+    var target = level.target;
+    var eye = level.eye;
     var up = v3.create(0, 1, 0);
 
     var invview = m4.lookAt(eye, target, up);
@@ -115,21 +115,21 @@
 
     var hoverBall = null;
     checkInterballCollisions(balls);
-    _.each(balls, function(ball) {
+    _.each(balls, function(ball, i) {
       // Accelerate with gravity
       if (!ball.contact) {
         v3.add(ball.velocity, GRAVITY, ball.velocity);
       }
 
       // Control the active ball with keys
-      if (ball == activeBall) ball.control(keys);
+      if (ball == level.ball) ball.control(keys);
 
       // Check what the mouse is hovering over
-      var collide = collideLine(ball.position, 1.0, screenNear, direction);
+      var collide = collideLine(ball.position, ball.radius, screenNear, direction);
       if (collide) {
         hoverBall = ball;
         if (mouseEvent && mouseDown) {
-          activeBall = ball;
+          level.activateBall(i);
         }
       }
 
