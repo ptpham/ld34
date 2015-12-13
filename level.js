@@ -36,15 +36,13 @@
     this.activeBall = 0;
     while (this.balls.length > 1) { this.balls.pop(); };
 
-    var start = this.ball.position;
-    start[0] = this.start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
-    start[1] = 10;
-    start[2] = this.start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
-
-    this.ball.reset(start, 1.0);
+    this.setStartPosition(this.start, this.ball.position);
+    this.ball.reset(this.ball.position, 1.0);
   };
 
-  Level.prototype.addBall = function (position, radius) {
+  Level.prototype.addBall = function (start, radius) {
+    var position = v3.create();
+    this.setStartPosition(start, position);
     this.balls.push(new Ball(position, radius));
   };
 
@@ -57,6 +55,16 @@
     this._eye[2] = this.width * 8 + target[2];
     this._eye[1] = this.width * 8 + target[1];
     return this._eye;
+  };
+
+  Level.prototype.setStartPosition = function (start, position) {
+    position[0] = start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
+    position[1] = 10;
+    position[2] = start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
+  };
+
+  Level.prototype.update = function () {
+    // TODO
   };
 
   root.Level = Level;
