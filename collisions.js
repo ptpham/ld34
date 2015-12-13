@@ -84,8 +84,11 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
   var rSquared = r*r;
   var normals = this.normals;
   var diff = v3.create();
+  var corner = null;
+
   for (var i = 0; i < this.count; i++) {
     var collided = false, contained = true;
+
     for (var j = 0; !collided && j < 3; j++) {
       var index = 3*i + j;
       var normal = normals[index];
@@ -95,10 +98,28 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
       v3.subtract(point, c, diff);
       diff[1] = 0;
       if (v3.lengthSq(diff) < rSquared) {
+        /*
         var center = this.centers[i];
         var diff = v3.subtract(c, center);
         diff[1] = 0;
-        return [point, v3.normalize(diff, diff)];
+        v3.normalize(diff);
+        */
+
+        v3.subtract(point, c, diff);
+        diff[1] = 0;
+
+        var normalBack = normals[3*i + (j + 2)%3];
+        var dotForward = Math.abs(v3.dot(diff, normal));
+        var dotBackward = Math.abs(v3.dot(diff, v3.mulScalar(normalBack, -1), tempV3));
+        
+        var current = [point, normal, dotForward, true];
+        if (dotBackward > dotForward) {
+          current[1] = normalBack;
+          current[2] = dotBackward;
+        }
+        
+        console.log(current[2]);
+        if (corner == null || corner[2] < current[2]) corner = current;
       }
 
       // Continue checking containment of circle in triangle
@@ -109,13 +130,25 @@ TriangleLookupXZ.prototype.collide = function(c, r, y) {
       v3.mulScalar(normal, -t, tempV3);
       v3.add(c, tempV3, tempV3);
       v3.subtract(tempV3, point, tempV3);
+      tempV3[1] = 0;
       var dot = v3.dot(tempV3, this.directions[index]);
+
+      v3.subtract(c, tempV3);
+      tempV3[1] = 0;
+
+      var margin = v3.dot(tempV3, this.directions[index]);
+
       if (Math.abs(t) < r && dot > 0 && dot < this.lengths[index]) {
+        console.log("edge", point, normal, t);
         return [point, normal, t];
       }
     }
-
     if (contained) return true;
+  }
+
+  if (corner) {
+    console.log('corner', corner);
+    return corner;
   }
 };
 
@@ -124,6 +157,7 @@ function checkLookupXZContact(lookups, ball) {
   var lower = position[1] - ball.radius;
   var upper = position[1] + ball.radius;
   var up = v3.create(0, 1, 0);
+  var radius = ball.radius;
   
   for (var i = 0; i < lookups.length; i++) {
     var lookup = lookups[lookups.length - i - 1];
@@ -133,16 +167,24 @@ function checkLookupXZContact(lookups, ball) {
     if (top < lower) return;
 
     var target = v3.create(0, top, 0);
-    var contact = lookup.collide(position, ball.radius, top);
+    var contact = lookup.collide(position, radius, top);
     var switched = (contact != null) ^ ball.contact;
 
-    if (switched && contact != null) {
+    if (contact != null) {
       var supported = lookup.collide(position, ball.radius, lower);
+      if (supported) console.log('supported');
       if (supported) {
+        ball.attachPlane(target, up);
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
-      } else if (contact && contact.length > 2) {
-        v3.add(ball.position, v3.mulScalar(contact[1], -contact[2]));
+      } else if (contact.length > 2) {
+        var coeff = radius*radius - contact[2]*contact[2];
+        if (coeff > 0) {
+          var downward = Math.sqrt(coeff);
+          var delta = top - (position[1] - downward);
+          console.log(delta);
+          position[1] += delta;
+        }
       }
     } else if (switched && Math.abs(top - lower) < 0.0001) {
       ball.decontact(v3.create(), 0.5);
@@ -150,8 +192,19 @@ function checkLookupXZContact(lookups, ball) {
       if (!contact || !contact.length) {
         contact = lookup.collide(position, ball.radius, position[1]);
       }
+
       if (contact) {
-        ball.hitPlane(contact[0], contact[1]); 
+        if (contact[3]) {
+          var normal = contact[1];
+          v3.mulScalar(normal, radius - contact[2], tempV3);
+          v3.add(position, tempV3, position);
+          var velocity = ball.velocity;
+          var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
+          v3.subtract(velocity, remove, velocity);
+        } else {
+          ball.attachPlane(contact[0], contact[1]);
+          ball.hitPlane(contact[0], contact[1]); 
+        }
       }
     }
   }

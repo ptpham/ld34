@@ -19,7 +19,7 @@
 
   Terrain.prototype.getAttributes = function () {
     var HEIGHT = 1;
-    var BLOCK_WIDTH = 1;
+    var BLOCK_WIDTH = 5;
     var thicknesses = this.thicknesses;
 
     if (!this.attributes) {

@@ -73,7 +73,6 @@ Ball.prototype.attachPlane = function(x, normal, epsilon) {
 
 // Reflect velocity orthgonal to plane
 Ball.prototype.hitPlane = function(x, normal, epsilon) {
-  this.attachPlane(x, normal, epsilon); 
   var velocity = this.velocity;
   var reflex = (1 + this.bounce);
   var remove = v3.mulScalar(normal, reflex*v3.dot(normal, this.velocity));

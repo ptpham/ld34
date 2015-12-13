@@ -115,6 +115,7 @@
     if (!ball.contact) {
       v3.add(ball.velocity, GRAVITY, ball.velocity);
       if (ball.position[1] < ball.radius) {
+        ball.attachPlane(target, up);
         ball.hitPlane(target, up);
         ball.contactPlane(target, up);
       }
