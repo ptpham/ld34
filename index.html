@@ -10,77 +10,88 @@
   <script src="terrain.js"></script>
   <script src="level.js"></script>
   <script src="ball.js"></script>
+  <link href='https://fonts.googleapis.com/css?family=Raleway:600,300' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" type="text/css" href="css/fontello.css">
+  <link rel="stylesheet" type="text/css" href="css/main.css">
+
+  <script id="default-vs" type="x-shader/v-shader">
+    attribute vec3 position;
+    uniform mat4 u_projection;
+    uniform mat4 u_world;
+    uniform mat4 u_view;
+    varying float v_height;
+
+    void main() {
+      v_height = position[1] / 10.0;
+      gl_Position = u_projection*u_view*u_world*vec4(position, 1.0);
+    }
+  </script>
+
+  <script id="default-fs" type="x-shader/f-shader">
+    precision mediump float;
+    varying float v_height;
+    uniform vec4 u_color;
+
+    void main() {
+      gl_FragColor = u_color * v_height;
+    }
+  </script>
 </head>
+
 <body>
-
-<script id="default-vs" type="x-shader/v-shader">
-  attribute vec3 position;
-  uniform mat4 u_projection;
-  uniform mat4 u_world;
-  uniform mat4 u_view;
-  varying float v_height;
-
-  void main() {
-    v_height = position[1] / 10.0;
-    gl_Position = u_projection*u_view*u_world*vec4(position, 1.0);
-  }
-</script>
-
-<script id="default-fs" type="x-shader/f-shader">
-  precision mediump float;
-  varying float v_height;
-  uniform vec4 u_color;
-
-  void main() {
-    gl_FragColor = u_color * v_height;
-  }
-</script>
-
-<style>
-  body { margin: 0px }
-  canvas { width: 100%; height: 100%; }
-  #watermeter { position: absolute; top: 0px; }
-  #reset-level { position: absolute; bottom: 0;}
-  .overlay {
-    width: 60%;
-    height: 60%;
-    background-color: white;
-    position: absolute;
-    top: 20%; left: 20%;
-    display: none;
-  }
-  #complete.last button {
-    display: none;
-  }
-  .visible {
-    display: block;
-  }
-</style>
   <progress id="watermeter" value="100"></progress>
+  <button id="reset-level" type="button" title="Reset Level">
+    <i class="icon icon-reset"></i>
+  </button>
   <canvas id="canvas"></canvas>
   <div id="instructions" class="overlay">
-    <strong>Controls:</strong>
-    <ul>
-      <li>Move your moss ball with WASD.</li>
-      <li>Double click the ball to split it in into multiple balls.</li>
-      <li>You can select moss balls by clicking them.</li>
-    </ul>
+    <div>
+      <p>
+        Navigate the level and get to the goal!
+        <br />
+        Your moss ball grows in water and needs to be about as big as the goal to proceed.
+      </p>
 
-    <strong>Gameplay:</strong>
-    <ul>
-      <li>Navigate the level and get to the goal!</li>
-      <li>Your moss ball needs to be about as big as the goal to proceed.</li>
-      <li>Your moss ball grows in water.</li>
+      <button id="close-instructions" type="button">Got it!</button>
+    </div>
+    <ul id="controls">
+      <li>
+        <i class="icon icon-up"></i>
+        <span class="key">w</span>
+      </li>
+      <li>
+        <i class="icon icon-left"></i>
+        <span class="key">a</span>
+      </li>
+      <li>
+        <i class="icon icon-down"></i>
+        <span class="key">s</span>
+      </li>
+      <li>
+        <i class="icon icon-right"></i>
+        <span class="key">d</span>
+      </li>
+      <li></li>
+      <li>
+        <i class="icon icon-circle-outline"></i>
+        <i class="icon icon-pointer"></i>
+        <span class="key">click to select</span>
+      </li>
+      <li>
+        <i class="icon icon-dot-2"></i>
+        <i class="icon icon-pointer"></i>
+        <span class="key">double click to split</span>
+      </li>
     </ul>
-
-    <button id="close-instructions" type="button">Got it!</button>
   </div>
   <div id="complete" class="overlay">
-    <strong>Level Complete!</strong>
-    <button id="next-level" type="button">Next Level</button>
+    <div>
+      <h2>Level Complete!</h2>
+      <button id="next-level" type="button">Next Level</button>
+    </div>
   </div>
-  <button id="reset-level" type="button">Reset</button>
 </body>
+
 <script>
   Level.load(levels);
 
