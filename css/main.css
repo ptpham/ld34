@@ -2,6 +2,11 @@ body {
   margin: 0px;
   color: #666;
   font-family: 'Raleway';
+  background: #7ec9c9; /* Old browsers */
+background: -moz-linear-gradient(top, #7ec9c9 0%, #b3d6c9 19%, #fff7e2 58%, #ffffff 96%); /* FF3.6-15 */
+background: -webkit-linear-gradient(top, #7ec9c9 0%,#b3d6c9 19%,#fff7e2 58%,#ffffff 96%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(to bottom, #7ec9c9 0%,#b3d6c9 19%,#fff7e2 58%,#ffffff 96%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7ec9c9', endColorstr='#ffffff',GradientType=0 );
 }
 canvas { width: 100%; height: 100%; }
 ul, p, h2 { padding: 0; margin: 0;}
