@@ -147,7 +147,7 @@ body > button:disabled {
 #title {
   position: absolute;
   width: 100%;
-  text-align: center;
+  text-align: left;
   bottom: 0;
   padding: 20px;
 }

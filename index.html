@@ -217,6 +217,7 @@
   var closeInstructions = document.getElementById('close-instructions');
   instructionButton.onclick = closeInstructions.onclick = function () {
     instructions.classList.toggle('visible');
+    this.blur();
   }
 
   function render() {
@@ -294,8 +295,13 @@
       // Update physics
       ball.update();
       checkLookupXZContact(terrainLookups, ball);
-
     });
+    
+    if (keys[32]) { // spacebar
+      level.splitBall();
+      updateSplitDisplay();
+      delete keys[32]; // immediately release
+    }
 
     level.update();
 
