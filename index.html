@@ -56,7 +56,6 @@
     display: block;
   }
 </style>
-  <progress id="watermeter" value="100"></progress>
   <canvas id="canvas"></canvas>
   <div id="instructions" class="overlay">
     <strong>Controls:</strong>
@@ -121,7 +120,7 @@
   document.ondblclick = function(e) { dblClick = true; };
 
   var instructions = document.getElementById('instructions');
-  instructions.classList.add('visible');
+  //instructions.classList.add('visible');
 
   var closeInstructions = document.getElementById('close-instructions');
   closeInstructions.onclick = function () {
