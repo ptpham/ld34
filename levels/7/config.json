@@ -1,0 +1,14 @@
+{
+  "name": "By Measure and Meter",
+  "height": 16,
+  "width": 20,
+  "thickness": [2, 2, 2, 2, 2, 2, 15],
+  "start": [1, 2],
+  "goals": [
+    {"position": [4, 1.5], "layer": 2, "radius": 2 },
+    {"position": [4, 13], "layer": 2, "radius": 1 },
+    {"position": [8, 1.5], "layer": 3, "radius": 2.5 },
+    {"position": [8, 13], "layer": 3, "radius": 3 },
+    {"position": [13, 7], "layer": 4, "radius": 3.2 }
+  ]
+}
