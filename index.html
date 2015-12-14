@@ -310,8 +310,8 @@
 
         if (collision) {
           var waterRemain = lookup.waterRemain;
-          var absorption = 0.001*waterRemain;
-          if (waterRemain > 0.001) {
+          var absorption = 0.01*waterRemain;
+          if (waterRemain > 0.01) {
             lookup.waterRemain -= absorption;
             ball.grow(absorption);
             absorbed = true;
