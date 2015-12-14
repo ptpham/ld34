@@ -102,8 +102,11 @@ body > button:disabled {
   display: none;
 }
 
-#instructions > button {
-  margin-top: 20px;
+#instructions > div {
+  display: flex;
+  flex-direction:column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 #instructions > div ul {
@@ -131,6 +134,10 @@ body > button:disabled {
 
 #instructions.alt > div > div:last-of-type {
   display: block;
+}
+
+#close-instructions {
+  width: 100px;
 }
 
 #controls {
