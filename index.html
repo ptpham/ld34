@@ -39,8 +39,17 @@
 </head>
 
 <body>
+  <button id="last-level" type="button" title="Last Level">
+    <i class="icon icon-left-caret"></i>
+  </button>
+  <button id="next-level" type="button" title="Next Level">
+    <i class="icon icon-right-caret"></i>
+  </button>
   <button id="reset-level" type="button" title="Reset Level">
     <i class="icon icon-reset"></i>
+  </button>
+  <button id="show-instructions" type="button" title="Show Instructions">
+    <i class="icon icon-info"></i>
   </button>
   <canvas id="canvas"></canvas>
   <div id="instructions" class="overlay">
@@ -86,13 +95,18 @@
   <div id="complete" class="overlay">
     <div>
       <h2>Level Complete!</h2>
-      <button id="next-level" type="button">Next Level</button>
+      <button id="complete-level" type="button">Next Level</button>
     </div>
   </div>
 </body>
 
 <script>
   Level.load(levels);
+  var resetButton = document.getElementById('reset-level');
+  var nextButton = document.getElementById('next-level');
+  var lastButton = document.getElementById('last-level');
+  var completeButton = document.getElementById('complete-level');
+  var instructionButton = document.getElementById('show-instructions');
 
   var v3 = twgl.v3, m4 = twgl.m4;
   var gl = twgl.getWebGLContext(canvas);
@@ -115,11 +129,9 @@
     mouseY = e.clientY;
   };
 
-  var reset = document.getElementById('reset-level');
-  var next = document.getElementById('next-level');
-
-  reset.onclick = function () { startLevel(levelIndex); };
-  next.onclick = function () { startLevel(++levelIndex); };
+  resetButton.onclick = function () { startLevel(levelIndex); };
+  nextButton.onclick = completeButton.onclick = function () { startLevel(++levelIndex); };
+  lastButton.onclick = function () { startLevel(--levelIndex); };
 
   var keys = { };
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
@@ -131,11 +143,11 @@
   document.ondblclick = function(e) { dblClick = true; };
 
   var instructions = document.getElementById('instructions');
-  //instructions.classList.add('visible');
+  instructions.classList.toggle('visible');
 
   var closeInstructions = document.getElementById('close-instructions');
-  closeInstructions.onclick = function () {
-    instructions.classList.remove('visible');
+  instructionButton.onclick = closeInstructions.onclick = function () {
+    instructions.classList.toggle('visible');
   }
 
   function render() {
@@ -281,21 +293,25 @@
     var complete = document.getElementById('complete');
     complete.classList.add('visible');
 
-    if (levelIndex === Level.list.length - 1)
-      complete.classList.add('last');
-
     completeTriggered = true;
     console.log('Level Complete!');
-  }
-
-  function startNextLevel () {
-    startLevel(++levelIndex);
   }
 
   function startLevel (levelIndex) {
     var complete = document.getElementById('complete');
     complete.classList.remove('visible');
-    complete.classList.remove('last');
+    completeButton.disabled = null;
+    nextButton.disabled = null;
+    lastButton.disabled = null;
+
+    if (levelIndex === Level.list.length - 1) {
+      completeButton.disabled = true;
+      nextButton.disabled = true;
+    }
+
+    if (levelIndex === 0) {
+      lastButton.disabled = true;
+    }
 
     level = Level.get(levelIndex);
     level.reset();

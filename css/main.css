@@ -17,17 +17,35 @@ button {
   padding: 5px 10px;
 }
 
-#watermeter { position: absolute; top: 0px; }
-#reset-level {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  color: #ccc;
+body > button {
   border: none;
-  padding: 0;
+  padding: 20px;
+  position: absolute;
+  width: 72px;
+  height: 64px;
+  margin: auto;
+  top: 0;
+  text-align: center;
 }
-#reset-level:hover {
-  color: #888;
+body > button:hover {
+  color: #444;
+}
+body > button:disabled {
+  cursor: default;
+  color: #ccc;
+}
+#reset-level {
+  left: 0; right: 0;
+}
+#last-level {
+  left: 0;
+}
+#next-level {
+  left: 64px;
+}
+#show-instructions {
+  right: 0;
+  font-size: 1.2em;
 }
 .overlay {
   width: 100%;
