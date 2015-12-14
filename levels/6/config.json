@@ -1,0 +1,10 @@
+{
+  "name": "Quick and Nimble",
+  "height": 16,
+  "width": 20,
+  "thickness": [2, 2, 2, 2, 2, 2, 2, 6],
+  "start": [0, 1],
+  "goals": [
+    {"position": [10, 10], "layer": 7, "radius": 2.71 }
+  ]
+}
