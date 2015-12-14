@@ -10,5 +10,6 @@
     {"position": [8, 1.5], "layer": 3, "radius": 2.5 },
     {"position": [8, 13], "layer": 3, "radius": 3 },
     {"position": [13, 7], "layer": 4, "radius": 3.2 }
-  ]
+  ],
+  "splits": 4
 }

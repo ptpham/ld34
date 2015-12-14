@@ -6,5 +6,7 @@
   "start": [8, 6],
   "goals": [
     {"position": [8, 18], "layer": 1, "radius": 2.57 }
-  ]
+  ],
+  "splits": 1,
+  "instructions": "Sometimes too much water is not a good thing. Luckily, you can split your moss ball to get a smaller one."
 }

@@ -6,5 +6,6 @@
   "start": [0, 0],
   "goals": [
     {"position": [1, 8], "layer": 1, "radius": 2.38 }
-  ]
+  ],
+  "instructions": "There aren't always walls to keep you from falling. If you lose your balance, reset the level."
 }
