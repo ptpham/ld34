@@ -1,0 +1,129 @@
+body {
+  margin: 0px;
+  color: #888;
+  font-family: 'Raleway';
+}
+canvas { width: 100%; height: 100%; }
+ul, p, h2 { padding: 0; margin: 0;}
+
+button {
+  font-size: 1.5em;
+  color: #888;
+  border-radius: 5px;
+  background: none;
+  border: 1px solid #888;
+  outline: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+body > button {
+  border: none;
+  padding: 20px;
+  position: absolute;
+  width: 72px;
+  height: 64px;
+  margin: auto;
+  top: 0;
+  text-align: center;
+}
+body > button:hover {
+  color: #444;
+}
+body > button:disabled {
+  cursor: default;
+  color: #ccc;
+}
+#reset-level {
+  left: 0; right: 0;
+}
+#last-level {
+  left: 0;
+}
+#next-level {
+  left: 64px;
+}
+#show-instructions {
+  right: 0;
+  font-size: 1.2em;
+}
+.overlay {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  position: absolute;
+  top: 0; left: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.overlay > div {
+  width: 50%;
+  height: 120px;
+  background-color: rgba(255, 255, 255, 0.8);
+  margin: auto;
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  padding: 20px;
+  border-radius: 5px;
+  -moz-box-shadow:    1px 1px 6px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.1);
+  box-shadow:         1px 1px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+.overlay.visible { opacity: 1; }
+.overlay.visible > div { pointer-events: all; }
+
+#complete > div {
+  text-align: center;
+}
+
+#complete h2 {
+  margin-bottom: 30px;
+}
+
+#complete.last button {
+  display: none;
+}
+
+#instructions > div ul {
+  list-style: none;
+}
+
+#instructions > div p {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+#controls {
+  position: absolute;
+  top: 25%;
+  left: 20px;
+  text-align: center;
+  width: 100%;
+  margin-left: -20px;
+}
+
+#controls > li {
+  display: inline-block;
+  margin-right: 20px;
+  position: relative;
+}
+#controls > li:last-of-type {
+  margin-right: 0;
+}
+
+#controls .icon-dot-2, #controls .icon-circle-outline {
+  position: relative;
+  top: -5px;
+}
+
+#controls .icon-pointer {
+  position: absolute;
+  left: 4px;
+  top: 5px;
+  -ms-transform: rotate(-30deg); /* IE 9 */
+  -webkit-transform: rotate(-30deg); /* Chrome, Safari, Opera */
+  transform: rotate(-30deg);
+}
