@@ -159,6 +159,7 @@
       <button id="complete-level" type="button">Next Level</button>
     </div>
   </div>
+  <div id="title"></div>
 </body>
 
 <script>
@@ -168,6 +169,7 @@
   var lastButton = document.getElementById('last-level');
   var completeButton = document.getElementById('complete-level');
   var instructionButton = document.getElementById('show-instructions');
+  var title = document.getElementById('title');
 
   var v3 = twgl.v3, m4 = twgl.m4;
   var gl = twgl.getWebGLContext(canvas);
@@ -405,6 +407,7 @@
     balls = level.balls;
 
     completeTriggered = false;
+    title.innerHTML = level.name;
   }
 
   render();

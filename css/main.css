@@ -1,6 +1,6 @@
 body {
   margin: 0px;
-  color: #888;
+  color: #666;
   font-family: 'Raleway';
 }
 canvas { width: 100%; height: 100%; }
@@ -33,6 +33,13 @@ body > button:hover {
 body > button:disabled {
   cursor: default;
   color: #ccc;
+}
+#title {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  bottom: 0;
+  padding: 20px;
 }
 #reset-level {
   left: 0; right: 0;
