@@ -6,5 +6,6 @@
   "start": [8, 18],
   "goals": [
     {"position": [10, 16], "layer": 6, "radius": 2.71 }
-  ]
+  ],
+  "instructions": "If you can't get to certain areas, try growing your moss ball. Larger moss balls can climb taller walls."
 }
