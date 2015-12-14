@@ -387,10 +387,10 @@
       if (!waterBufferInfo) return;
       var lookup = waterLookups[i];
       m4.identity(world);
-      tempV3[1] = -lookup.bottom;
+      tempV3[1] = lookup.bottom;
       m4.translate(world, tempV3, world);
       m4.scale(world, v3.create(1, lookup.waterRemain / lookup.waterTotal, 1), world);
-      tempV3[1] = lookup.bottom;
+      tempV3[1] = -lookup.bottom;
       m4.translate(world, tempV3, world);
       uniforms.u_world = world;
 
