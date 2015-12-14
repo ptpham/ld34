@@ -8,6 +8,7 @@
   <script src="levels/levels.js"></script>
   <script src="collisions.js"></script>
   <script src="terrain.js"></script>
+  <script src="sounds.js"></script>
   <script src="level.js"></script>
   <script src="ball.js"></script>
   <link href='https://fonts.googleapis.com/css?family=Raleway:600,300' rel='stylesheet' type='text/css'>
@@ -171,6 +172,13 @@
 </body>
 
 <script>
+  var audioContext = new AudioContext();
+  var sounds = {};
+
+  sounds.low = new Sound(audioContext, 'low.mp3');
+  sounds.chord = new Sound(audioContext, 'chord.mp3');
+  sounds.high = new Sound(audioContext, 'high.mp3');
+
   Level.load(levels);
   var firstLoad = true;
 
@@ -369,6 +377,12 @@
     twgl.setUniforms(terrainProgramInfo, uniforms);
     twgl.drawBufferInfo(gl, gl.TRIANGLES, terrainBufferInfo);
 
+    var assessment = level.assessActiveBall();
+    if (assessment != null) {
+      if (assessment == -1) sounds.low.play();
+      if (assessment == 0) sounds.chord.play();
+      if (assessment == 1) sounds.high.play();
+    }
     requestAnimationFrame(render);
     mouseEvent = false;
     dblClick = false;

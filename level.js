@@ -1,4 +1,6 @@
 (function (root) {
+  var RADIUS_THRESHOLD = 0.2;
+
   function Level (attributes) {
     this.name = attributes.name;
     this.width = attributes.width;
@@ -111,7 +113,7 @@
       var goal = goals[index];
 
       var diff = Math.abs(goal.radius - ball.radius);
-      if (diff < 0.2) {
+      if (diff < RADIUS_THRESHOLD) {
         completed++;
       }
     });
@@ -119,6 +121,22 @@
     if (completed === this.goals.length) {
       this.complete = true;
     }
+  };
+
+  Level.prototype.assessActiveBall = function() {
+    var ball = this.balls[this.activeBall];
+    for (var i = 0; i < this.goals.length; i++) {
+      var goal = this.goals[i];
+      var collide = collideSphere(ball.position, ball.radius, 
+        goal.position, goal.radius);
+      if (collide) {
+        var diff = ball.radius - goal.radius;
+        if (diff < -RADIUS_THRESHOLD) return -1; 
+        if (diff > RADIUS_THRESHOLD) return 1;
+        else return 0;
+      }
+    }
+    return null;
   };
 
   root.Level = Level;
