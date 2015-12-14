@@ -115,12 +115,16 @@
   <canvas id="canvas"></canvas>
   <div id="instructions" class="overlay">
     <div>
-      <p>
-        Navigate the level and get to the goal!
-        <br />
-        Your moss ball grows in water and needs to be about as big as the goal to proceed.
-      </p>
-
+      <div>
+        <p>
+          Navigate the level and get to the goal!
+          <br />
+          Your moss ball grows in water and needs to be about as big as the goal to proceed.
+        </p>
+      </div>
+      <div>
+        <p id="alt-instructions"></p>
+      </div>
       <button id="close-instructions" type="button">Got it!</button>
     </div>
     <ul id="controls">
@@ -168,13 +172,19 @@
 
 <script>
   Level.load(levels);
+  var firstLoad = true;
+
   var resetButton = document.getElementById('reset-level');
   var nextButton = document.getElementById('next-level');
   var lastButton = document.getElementById('last-level');
   var completeButton = document.getElementById('complete-level');
   var instructionButton = document.getElementById('show-instructions');
+  var altInstructions = document.getElementById('alt-instructions');
   var title = document.getElementById('title');
   var splits = document.getElementById('splits');
+
+  var instructions = document.getElementById('instructions');
+  var closeInstructions = document.getElementById('close-instructions');
 
   var v3 = twgl.v3, m4 = twgl.m4;
   var gl = twgl.getWebGLContext(canvas);
@@ -211,10 +221,6 @@
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
 
-  var instructions = document.getElementById('instructions');
-  instructions.classList.toggle('visible');
-
-  var closeInstructions = document.getElementById('close-instructions');
   instructionButton.onclick = closeInstructions.onclick = function () {
     instructions.classList.toggle('visible');
     this.blur();
@@ -421,6 +427,9 @@
     completeTriggered = false;
     title.innerHTML = level.name;
     updateSplitDisplay(true);
+    updateInstructions(firstLoad);
+
+    firstLoad = false;
   }
 
   function updateSplitDisplay (suppress) {
@@ -431,6 +440,22 @@
       setTimeout(function () {
         splits.classList.remove('error');
       }, 500)
+    }
+  }
+
+  function updateInstructions (first) {
+    var levelInstructions = level.instructions;
+    altInstructions.innerHTML = levelInstructions;
+
+    if (first) {
+      instructions.classList.add('visible');
+    }
+
+    if (levelInstructions && !first) {
+      instructions.classList.add('visible');
+      instructions.classList.add('alt');
+    } else {
+      instructions.classList.remove('alt');
     }
   }
 

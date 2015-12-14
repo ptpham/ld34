@@ -112,6 +112,18 @@ body > button:disabled {
   user-select: none;
 }
 
+#instructions > div > div:last-of-type {
+  display: none;
+}
+
+#instructions.alt > div > div:first-of-type {
+  display: none;
+}
+
+#instructions.alt > div > div:last-of-type {
+  display: block;
+}
+
 #controls {
   position: absolute;
   top: 25%;

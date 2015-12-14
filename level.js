@@ -7,6 +7,8 @@
 
     this.maxSplits = attributes.splits || 0;
 
+    this.instructions = attributes.instructions || '';
+
     this.terrain = new Terrain(
       attributes.width,
       attributes.layers,
