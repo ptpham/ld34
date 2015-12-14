@@ -178,6 +178,28 @@
   sounds.low = new Sound(audioContext, 'low.mp3');
   sounds.chord = new Sound(audioContext, 'chord.mp3');
   sounds.high = new Sound(audioContext, 'high.mp3');
+  sounds.bright = new Sound(audioContext, 'bright.mp3');
+
+  var gainNode = audioContext.createGain();
+  gainNode.connect(audioContext.destination);
+  gainNode.gain.value = 0.05;
+
+  sounds.bright.loaded.then(function(buffer) {
+    var source = audioContext.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(gainNode);
+    source.start();
+  });
+
+  var brightTarget = null;
+  function setBrightGain(amount) {
+    if (brightTarget == amount) return;
+    brightTarget = amount;
+    var now = audioContext.currentTime;
+    var gain = gainNode.gain;
+    gain.linearRampToValueAtTime(amount, now + 2);
+  }
 
   Level.load(levels);
   var firstLoad = true;
@@ -280,18 +302,26 @@
       }
 
       // Soak up water from water layers
+      var absorbed = false;
       _.each(waterLookups, function(lookup) {
         if (!lookup.waterRemain || lookup.waterRemain <= 0) return;
         var collision = lookup.collide(ball.position,
           ball.radius, ball.position[1] - ball.radius);
+
         if (collision) {
           var waterRemain = lookup.waterRemain;
-          var absorption = 0.001*waterRemain;
-          if (waterRemain < 0.001) absorption = waterRemain;
-          lookup.waterRemain -= absorption;
-          ball.grow(absorption);
+          var absorption = 0.01*waterRemain;
+          if (waterRemain > 0.01) {
+            lookup.waterRemain -= absorption;
+            ball.grow(absorption);
+            absorbed = true;
+          } else lookup.waterRemain = 0.0;
         }
       });
+
+      if (ball == level.ball) {
+        setBrightGain(absorbed? 1.0 : 0.05);
+      }
 
       // Check what the mouse is hovering over
       var collide = collideLine(ball.position, ball.radius, screenNear, direction);

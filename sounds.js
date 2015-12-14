@@ -13,8 +13,13 @@ function loadResource(path, type) {
 function Sound(ctx, path) {
   var _this = this;
   this.ctx = ctx;
-  loadResource(path).then(function(data) {
-    ctx.decodeAudioData(data, function(buffer) { _this.buffer = buffer; });
+  this.loaded = new Promise(function(resolve, reject) {
+    loadResource(path).then(function(data) {
+      ctx.decodeAudioData(data, function(buffer) {
+        _this.buffer = buffer;
+        resolve(buffer);
+      });
+    });
   });
 }
 
