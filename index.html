@@ -419,7 +419,7 @@
       delete keys[32]; // immediately release
     }
 
-    level.update();
+    var assessments = level.update();
 
     function getDefaultUniforms() {
       return {
@@ -455,12 +455,21 @@
     uniforms = getDefaultUniforms();
     gl.useProgram(defaultProgramInfo.program);
     twgl.setBuffersAndAttributes(gl, defaultProgramInfo, torusBufferInfo);
-    uniforms.u_color = [0.8, 0.8, 0.6, 1.0];
-    uniforms.u_ambient = [0.4, 0.4, 0.3, 1.0];
-    _.each(level.goals, function (goal) {
+    uniforms.u_ambient = [0.9, 0.9, 0.3, 1.0];
+    _.each(level.goals, function (goal, i) {
       level.getGoalWorld(world, goal);
       m4.rotateX(world, timestamp/2400, world);
       uniforms.u_world = world;
+      var assessment = assessments[i];
+      if (!assessment) { // null or 0
+        uniforms.u_color = [1.0, 0.75, 0.6, 1.0];;
+      }
+      else if (assessment == -1) {
+        uniforms.u_color = [0.2, 0.4, 1.0, 1.0];
+      }
+      else if (assessment == 1) {
+        uniforms.u_color = [0.9, 0.2, 0.3, 1.0];
+      }
       twgl.setUniforms(defaultProgramInfo, uniforms);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, torusBufferInfo);
     });
@@ -495,9 +504,15 @@
 
     var assessment = level.assessActiveBall();
     if (assessment != null) {
-      if (assessment == -1) sounds.low.play();
-      if (assessment == 0) sounds.chord.play();
-      if (assessment == 1) sounds.high.play();
+      if (assessment == -1) {
+        sounds.low.play();
+      }
+      if (assessment == 0) {
+        sounds.chord.play();
+      }
+      if (assessment == 1) {
+        sounds.high.play();
+      }
     }
     requestAnimationFrame(render);
     mouseEvent = false;

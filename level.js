@@ -109,20 +109,28 @@
     var goals = this.goals;
     var scored = checkGoalCollisions(goals, this.balls);
     var completed = 0;
-    _.each(scored, function (ball, index) {
-      if (!ball) return;
+    var assessments = _.map(scored, function (ball, index) {
+      if (!ball) return null;
       var goal = goals[index];
 
-      var diff = Math.abs(goal.radius - ball.radius);
-      if (diff < RADIUS_THRESHOLD) {
+      var diff = ball.radius - goal.radius;
+
+      var assessment = 0;
+      if (diff < -RADIUS_THRESHOLD) assessment = -1;
+      if (diff > RADIUS_THRESHOLD) assessment = 1;
+
+      var distance = Math.abs(diff);
+      if (distance < RADIUS_THRESHOLD) {
         v3.copy(goal.position, ball.position);
         completed++;
       }
+      return assessment;
     });
 
     if (completed === this.goals.length) {
       this.complete = true;
     }
+    return assessments;
   };
 
   Level.prototype.assessActiveBall = function() {
