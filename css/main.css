@@ -14,7 +14,7 @@ ul, p, h2 { padding: 0; margin: 0;}
 
 button {
   font-size: 1.5em;
-  color: #888;
+  color: #666;
   border-radius: 5px;
   background: none;
   border: 1px solid #888;
@@ -33,12 +33,12 @@ body > button {
   top: 0;
   text-align: center;
 }
-body > button:hover {
+body > button:not(:disabled):hover {
   color: #444;
 }
 body > button:disabled {
   cursor: default;
-  color: #ccc;
+  opacity: 0.4;
 }
 #reset-level {
   left: 0; right: 0;
