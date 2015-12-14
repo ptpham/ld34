@@ -64,7 +64,7 @@
 
   Level.prototype.setStartPosition = function (start, position) {
     position[0] = start[0] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
-    position[1] = 10;
+    position[1] = 15;
     position[2] = start[1] * Terrain.BLOCK_WIDTH + Terrain.BLOCK_WIDTH / 2;
     return position;
   };

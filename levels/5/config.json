@@ -2,7 +2,7 @@
   "name": "Fecundity",
   "height": 20,
   "width": 16,
-  "thickness": [1, 0.5, 2, 2.3, 2.5],
+  "thickness": [1, 0.5, 3, 4, 5],
   "start": [8, 14],
   "goals": [
     {"position": [0, 0], "layer": 0, "radius": 1.52 },
