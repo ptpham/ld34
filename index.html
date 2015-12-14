@@ -196,7 +196,7 @@
       <div>
         <p id="alt-instructions"></p>
       </div>
-      <button id="close-instructions" type="button">Got it!</button>
+      <button id="close-instructions" type="button">Start</button>
     </div>
     <ul id="controls">
       <li>
@@ -272,7 +272,7 @@
   }
 
   Level.load(levels);
-  var firstLoad = true;
+  var firstLoad = false;
 
   var resetButton = document.getElementById('reset-level');
   var nextButton = document.getElementById('next-level');
@@ -297,7 +297,7 @@
 
   var GRAVITY = v3.create(0, -0.01, 0);
 
-  var levelIndex = 1;
+  var levelIndex = 0;
   var level, balls, terrain;
   var terrainLookups, waterLookups, terrainBufferInfo, waterBufferInfos;
   var completeTriggered;

@@ -102,12 +102,16 @@ body > button:disabled {
   display: none;
 }
 
+#instructions > button {
+  margin-top: 20px;
+}
+
 #instructions > div ul {
   list-style: none;
 }
 
 #instructions > div p {
-  text-align: left;
+  text-align: center;
   margin-bottom: 20px;
   -webkit-touch-callout: none;
   -webkit-user-select: none;

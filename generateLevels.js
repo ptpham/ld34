@@ -7,7 +7,8 @@ var levels = [];
 
 var directories = fs.readdirSync(levelDir);
 directories = _.reject(directories, function (dir) {
-  return (dir === '.DS_Store' || dir === 'levels.js');
+  return (dir.toString().indexOf('test') != -1 
+    || dir === '.DS_Store' || dir === 'levels.js');
 });
 var numLevels = directories.length;
 
