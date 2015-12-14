@@ -5,6 +5,8 @@
     this.height = attributes.height;
     this.start = attributes.start;
 
+    this.maxSplits = attributes.splits || 0;
+
     this.terrain = new Terrain(
       attributes.width,
       attributes.layers,
@@ -24,6 +26,10 @@
     get: function() { return this.balls[this.activeBall]; }
   });
 
+  Object.defineProperty(Level.prototype, 'splits', {
+    get: function() { return this.maxSplits - this.numSplits; }
+  });
+
   Object.defineProperty(Level.prototype, 'target', {
     get: function() { return this.ball.position; }
   });
@@ -39,6 +45,7 @@
     this.setStartPosition(this.start, this.ball.position);
     this.ball.reset(this.ball.position, 1.0);
     this.complete = false;
+    this.numSplits = 0;
   };
 
   Level.prototype.addBall = function (start, radius) {
@@ -53,6 +60,13 @@
 
   Level.prototype.activateBall = function (index) {
     this.activeBall = index;
+  };
+
+  Level.prototype.splitBall = function (ball) {
+    if (!this.splits) return;
+    var newBall = ball.split();
+    this.addBall(newBall);
+    this.numSplits++;
   };
 
   Level.prototype.getEyeFor = function(target) {

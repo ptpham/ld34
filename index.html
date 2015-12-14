@@ -160,6 +160,10 @@
     </div>
   </div>
   <div id="title"></div>
+  <div id="splits">
+    <span></span>
+    <i class="icon icon-dot-2"></i>
+  </div>
 </body>
 
 <script>
@@ -170,6 +174,7 @@
   var completeButton = document.getElementById('complete-level');
   var instructionButton = document.getElementById('show-instructions');
   var title = document.getElementById('title');
+  var splits = document.getElementById('splits');
 
   var v3 = twgl.v3, m4 = twgl.m4;
   var gl = twgl.getWebGLContext(canvas);
@@ -279,7 +284,8 @@
       if (collide) {
         hoverBall = ball;
         if (dblClick) {
-          level.addBall(ball.split());
+          level.splitBall(ball);
+          updateSplitDisplay();
         } else if (mouseEvent && mouseDown) {
           level.activateBall(i);
         }
@@ -408,6 +414,18 @@
 
     completeTriggered = false;
     title.innerHTML = level.name;
+    updateSplitDisplay(true);
+  }
+
+  function updateSplitDisplay (suppress) {
+    var numSplits = level.splits;
+    splits.firstElementChild.innerHTML = numSplits;
+    if (!numSplits && !suppress) {
+      splits.classList.add('error');
+      setTimeout(function () {
+        splits.classList.remove('error');
+      }, 500)
+    }
   }
 
   render();
