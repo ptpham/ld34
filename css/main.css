@@ -83,7 +83,7 @@ body > button:disabled {
   margin-bottom: 30px;
 }
 
-#complete.last button {
+#complete button:disabled {
   display: none;
 }
 
