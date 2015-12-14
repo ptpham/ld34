@@ -216,9 +216,13 @@
     mouseY = e.clientY;
   };
 
-  resetButton.onclick = function () { startLevel(levelIndex); };
-  nextButton.onclick = completeButton.onclick = function () { startLevel(++levelIndex); };
-  lastButton.onclick = function () { startLevel(--levelIndex); };
+  resetButton.onclick = function () { startLevel(levelIndex); this.blur(); };
+  nextButton.onclick = completeButton.onclick = function () { startLevel(++levelIndex); this.blur(); };
+  lastButton.onclick = function () { startLevel(--levelIndex); this.blur(); };
+  instructionButton.onclick = closeInstructions.onclick = function () {
+    instructions.classList.toggle('visible');
+    this.blur();
+  }
 
   var keys = { };
   document.onkeydown = function(e) { keys[e.keyCode] = true; };
@@ -228,11 +232,6 @@
   document.onmousedown = function(e) { mouseEvent = true; mouseDown = true; };
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
-
-  instructionButton.onclick = closeInstructions.onclick = function () {
-    instructions.classList.toggle('visible');
-    this.blur();
-  }
 
   function render() {
     if (level.complete && !completeTriggered) {
