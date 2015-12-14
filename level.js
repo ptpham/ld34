@@ -66,6 +66,7 @@
 
   Level.prototype.splitBall = function (ball) {
     if (!this.splits) return;
+    if (!ball) ball = this.ball;
     var newBall = ball.split();
     this.addBall(newBall);
     this.numSplits++;
