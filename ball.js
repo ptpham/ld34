@@ -54,7 +54,7 @@ Ball.prototype.reset = function (position, radius) {
   m4.identity(this.rotation);
   this.position = position;
   this.radius = radius;
-  this.friction = 0.99;
+  this.friction = 0.95;
   this.bounce = 0.3;
 };
 
