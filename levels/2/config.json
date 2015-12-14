@@ -1,8 +1,8 @@
 {
-  "name": "A Careful Hand",
+  "name": "Steady Hands",
   "height": 10,
   "width": 16,
-  "thickness": [2, 2, 2],
+  "thickness": [2, 1, 1],
   "start": [0, 0],
   "goals": [
     {"position": [1, 8], "layer": 1, "radius": 2.38 }

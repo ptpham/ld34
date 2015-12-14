@@ -92,7 +92,7 @@
     var radius = goal.radius;
     var platform = this.terrain.platforms[goal.layer];
     var position = this.setStartPosition(goal.position, v3.create());
-    position[1] = platform.bottom + platform.thickness;
+    position[1] = platform.bottom + platform.thickness + goal.radius;
     return {
       position: position,
       radius: radius
@@ -115,6 +115,7 @@
 
       var diff = Math.abs(goal.radius - ball.radius);
       if (diff < RADIUS_THRESHOLD) {
+        v3.copy(goal.position, ball.position);
         completed++;
       }
     });

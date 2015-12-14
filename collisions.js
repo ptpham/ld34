@@ -267,13 +267,11 @@ function checkGoalCollisions (goals, balls) {
       v3.subtract(goal.position, ball.position, diff);
       var distance = v3.length(diff);
 
-      if (distance < goal.radius + ball.radius / 2 && distance < nearestDistance) {
+      if (distance < goal.radius && distance < nearestDistance) {
         nearestBall = ball;
         nearestDistance = distance;
       }
     }
-
-    // TODO: gently nudge to center
 
     return nearestBall;
   });

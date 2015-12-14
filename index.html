@@ -18,17 +18,47 @@
   <script id="default-vs" type="x-shader/v-shader">
     attribute vec3 position;
     attribute vec3 normal;
+
     uniform mat4 u_projection;
     uniform mat4 u_world;
     uniform mat4 u_view;
     uniform vec3 u_lightWorldPos;
     uniform mat4 u_camera;
+
     varying float v_height;
     varying vec3 v_normal;
     varying vec3 v_surfaceToLight;
     varying vec3 v_surfaceToView;
 
     void main() {
+      vec4 fullPosition = vec4(position, 1.0);
+      v_height = position[1] / 10.0;
+      v_normal = (u_world * vec4(normal, 0)).xyz;
+      v_surfaceToLight = u_lightWorldPos - (u_world * fullPosition).xyz;
+      v_surfaceToView = (u_camera[3] - (u_world * fullPosition)).xyz;
+      gl_Position = u_projection*u_view*u_world*fullPosition;
+    }
+  </script>
+
+  <script id="ball-vs" type="x-shader/v-shader">
+    attribute vec3 position;
+    attribute vec3 normal;
+    attribute vec2 texcoord;
+
+    uniform mat4 u_projection;
+    uniform mat4 u_world;
+    uniform mat4 u_view;
+    uniform vec3 u_lightWorldPos;
+    uniform mat4 u_camera;
+
+    varying float v_height;
+    varying vec3 v_normal;
+    varying vec3 v_surfaceToLight;
+    varying vec3 v_surfaceToView;
+    varying vec2 v_texcoord;
+
+    void main() {
+      v_texcoord = texcoord;
       vec4 fullPosition = vec4(position, 1.0);
       v_height = position[1] / 10.0;
       v_normal = (u_world * vec4(normal, 0)).xyz;
@@ -95,6 +125,46 @@
       vec4 outColor = vec4(
         (u_lightColor * (color * litR.y + color * u_ambient)).rgb,
         color.a);
+      gl_FragColor = outColor;
+    }
+  </script>
+
+  <script id="ball-fs" type="x-shader/f-shader">
+    precision mediump float;
+    varying float v_height;
+    varying vec3 v_normal;
+    varying vec3 v_surfaceToLight;
+    varying vec3 v_surfaceToView;
+    varying vec2 v_texcoord;
+
+    uniform sampler2D u_fringe;
+    uniform vec4 u_color;
+    uniform vec4 u_lightColor;
+    uniform vec4 u_ambient;
+    uniform vec4 u_specular;
+    uniform float u_shininess;
+    uniform float u_specularFactor;
+
+    vec4 lit(float l ,float h, float m) {
+      return vec4(1.0, max(l, 0.0), (l > 0.0) ? pow(max(0.0, h), m) : 0.0, 1.0);
+    }
+
+    void main() {
+      vec4 color = u_color*texture2D(u_fringe, v_texcoord);
+      vec3 normal = normalize(v_normal);
+      vec3 surfaceToLight = normalize(v_surfaceToLight);
+      vec3 surfaceToView = normalize(v_surfaceToView);
+      vec3 halfVector = normalize(surfaceToLight + surfaceToView);
+
+      float nstol = dot(normal, surfaceToLight);
+      vec4 litR = lit(nstol, dot(normal, halfVector), u_shininess);
+
+      float haloFactor = max(min(pow(nstol, 2.0), 1.0)/2.5, 0.0);
+      if (nstol < 0.0) haloFactor = 0.0;
+      vec4 specContrib = haloFactor*u_specular;
+
+      vec4 standard = u_lightColor*(color * litR.y + color * u_ambient);
+      vec4 outColor = vec4((standard + specContrib).rgb, color.a);
       gl_FragColor = outColor;
     }
   </script>
@@ -220,7 +290,10 @@
   var gl = twgl.getWebGLContext(canvas);
   var defaultProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "default-fs"]);
   var terrainProgramInfo = twgl.createProgramInfo(gl, ["default-vs", "terrain-fs"]);
+  var ballProgramInfo = twgl.createProgramInfo(gl, ["ball-vs", "ball-fs"]);
   var sphereBufferInfo = twgl.primitives.createSphereBufferInfo(gl, 1.0, 12, 8);
+  var torusBufferInfo = twgl.primitives.createTorusBufferInfo(gl, 1.0, 0.1, 16, 8);
+  var furryTexture = twgl.createTexture(gl, { src: 'furry.jpg' });
 
   var GRAVITY = v3.create(0, -0.01, 0);
 
@@ -255,7 +328,7 @@
   document.onmouseup = function(e) { mouseEvent = true; mouseDown = false; };
   document.ondblclick = function(e) { dblClick = true; };
 
-  function render() {
+  function render(timestamp) {
     if (level.complete && !completeTriggered) {
       completeLevel(levelIndex);
     }
@@ -348,38 +421,51 @@
 
     level.update();
 
+    function getDefaultUniforms() {
+      return {
+        u_projection: projection,
+        u_view: view,
+        u_camera: invview,
+        u_lightWorldPos: [80, 80, -80],
+        u_lightColor: [1.0, 1.0, 0.95, 1.0],
+        u_ambient: [0.2, 0.2, 0.2, 1],
+        u_specular: [0.9, 0.9, 0.8, 1],
+        u_shininess: 70,
+        u_specularFactor: 0.8
+      };
+    }
+
     // Render all balls
-    var uniforms = {
-      u_projection: projection,
-      u_view: view,
-      u_camera: invview,
-      u_lightWorldPos: [80, 80, -80],
-      u_lightColor: [1.0, 1.0, 0.95, 1.0],
-      u_ambient: [0.2, 0.2, 0.2, 1],
-      u_specular: [0.9, 0.9, 0.8, 1],
-      u_shininess: 70,
-      u_specularFactor: 0.8
-    };
-    gl.useProgram(defaultProgramInfo.program);
-    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, sphereBufferInfo);
+    var uniforms = getDefaultUniforms();
+    gl.useProgram(ballProgramInfo.program);
+    uniforms.u_ambient = [0.2, 0.4, 0.3, 1.0];
+    uniforms.u_fringe = furryTexture;
+    uniforms.u_specular = [1.0, 1.0, 0.7, 1.0];
+    twgl.setBuffersAndAttributes(gl, ballProgramInfo, sphereBufferInfo);
     _.each(balls, function(ball) {
       ball.getWorld(world);
       var alpha = (ball == hoverBall) ? 0.8 : 1.0;
       
       uniforms.u_world = world;
       uniforms.u_color = [0.2, 0.75, 0.3, alpha];
-      twgl.setUniforms(defaultProgramInfo, uniforms);
+      twgl.setUniforms(ballProgramInfo, uniforms);
       twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
     });
 
+    uniforms = getDefaultUniforms();
+    gl.useProgram(defaultProgramInfo.program);
+    twgl.setBuffersAndAttributes(gl, defaultProgramInfo, torusBufferInfo);
+    uniforms.u_color = [0.8, 0.8, 0.6, 1.0];
+    uniforms.u_ambient = [0.4, 0.4, 0.3, 1.0];
     _.each(level.goals, function (goal) {
       level.getGoalWorld(world, goal);
+      m4.rotateX(world, timestamp/2400, world);
       uniforms.u_world = world;
-      uniforms.u_color = [1.0, 0.2, 0.2, 1.0];
       twgl.setUniforms(defaultProgramInfo, uniforms);
-      twgl.drawBufferInfo(gl, gl.TRIANGLES, sphereBufferInfo);
+      twgl.drawBufferInfo(gl, gl.TRIANGLES, torusBufferInfo);
     });
 
+    uniforms = getDefaultUniforms();
     uniforms.u_color = [0.5, 0.95, 1.0, 1.0];
     tempV3[0] = 0;
     tempV3[2] = 0;
@@ -399,6 +485,7 @@
       twgl.drawBufferInfo(gl, gl.TRIANGLES, waterBufferInfo);
     });
 
+    uniforms = getDefaultUniforms();
     gl.useProgram(terrainProgramInfo.program);
     twgl.setBuffersAndAttributes(gl, terrainProgramInfo, terrainBufferInfo);
     uniforms.u_color = [0.98, 0.83, 0.58, 1.0];
@@ -502,7 +589,7 @@
     }
   }
 
-  render();
+  requestAnimationFrame(render);
 </script>
 </html>
 
