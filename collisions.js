@@ -197,10 +197,11 @@ function checkLookupXZContact(lookups, ball) {
           var velocity = ball.velocity;
           var remove = v3.mulScalar(normal, v3.dot(normal, velocity));
           v3.subtract(velocity, remove, velocity);
-        } else {
+        } else if (contact[0] && contact[1]) {
           ball.hitPlane(contact[0], contact[1]);
         }
-        ball.removeAngular(contact[1]);
+
+        if (contact[1]) ball.removeAngular(contact[1]);
         handled = true;
       }
     }
