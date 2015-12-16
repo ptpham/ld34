@@ -139,7 +139,6 @@
     varying vec3 v_surfaceToView;
     varying vec3 v_facet;
 
-    uniform sampler2D u_fringe;
     uniform vec4 u_color;
     uniform vec4 u_lightColor;
     uniform vec4 u_ambient;
@@ -312,7 +311,6 @@
   var ballProgramInfo = twgl.createProgramInfo(gl, ["ball-vs", "ball-fs"]);
   var sphereBufferInfo = twgl.createBufferInfoFromArrays(gl, sphereBuffers);
   var torusBufferInfo = twgl.primitives.createTorusBufferInfo(gl, 1.0, 0.1, 16, 8);
-  var furryTexture = twgl.createTexture(gl, { src: 'furry.jpg' });
 
   var GRAVITY = v3.create(0, -0.01, 0);
 
@@ -458,7 +456,6 @@
     var uniforms = getDefaultUniforms();
     gl.useProgram(ballProgramInfo.program);
     uniforms.u_ambient = [0.2, 0.4, 0.3, 1.0];
-    uniforms.u_fringe = furryTexture;
     uniforms.u_specular = [1.0, 1.0, 0.7, 1.0];
     twgl.setBuffersAndAttributes(gl, ballProgramInfo, sphereBufferInfo);
     _.each(balls, function(ball) {
